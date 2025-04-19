@@ -118,7 +118,7 @@ export default function ProfilePage() {
         
       if (error) throw error
       
-      setMessage({ type: 'success', text: 'Profile updated successfully!' })
+      setMessage({ type: 'success', text: 'Профиль успешно обновлен!' })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
       setMessage({ type: 'error', text: errorMessage })
@@ -131,14 +131,14 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg text-gray-600">Loading...</div>
+        <div className="text-lg text-gray-600">Загрузка...</div>
       </div>
     )
   }
   
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Profile</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Ваш профиль</h1>
       
       {message && (
         <div className={`p-4 mb-6 rounded-md ${
@@ -151,7 +151,7 @@ export default function ProfilePage() {
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
         <div>
           <label htmlFor="avatar-upload" className="block text-sm font-medium text-gray-700 mb-2">
-            Profile Picture
+            Изображение профиля
           </label>
           <div className="flex items-center space-x-6">
             <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100">
@@ -185,7 +185,7 @@ export default function ProfilePage() {
               type="file"
               accept="image/*"
               onChange={handleAvatarChange}
-              aria-label="Choose profile picture"
+              aria-label="Выберите фотографию профиля"
               className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"
             />
           </div>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
         
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-            Full Name
+            ФИО
           </label>
           <input
             id="fullName"
@@ -201,7 +201,7 @@ export default function ProfilePage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Your full name"
+            placeholder="Полное имя"
           />
         </div>
         
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             disabled={isSaving}
             className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            {isSaving ? 'Saving...' : 'Save Profile'}
+            {isSaving ? 'Сохранение...' : 'Сохранить профиль'}
           </button>
         </div>
       </form>

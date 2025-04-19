@@ -13,12 +13,15 @@ interface ProductCardProps {
   onEdit: (product: Product) => void
 }
 
+// Define a constant for the default tag to ensure consistency
+export const DEFAULT_TAG = 'разное'
+
 export default function ProductCard({ product, onDelete, onEdit }: ProductCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const supabase = createClient()
   
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return
+    if (!window.confirm('Вы уверены, что хотите удалить этот продукт?')) return
     
     setIsDeleting(true)
     try {
@@ -44,17 +47,20 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
     }
   }
 
+  // Helper function to get the actual tag value (either the product tag or the default)
+  const getDisplayTag = () => product.tag || DEFAULT_TAG
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="relative h-48">
         <SupabaseImage 
           src={product.image_url || ''} 
-          alt={product.description || 'Product image'} 
+          alt={product.description || 'Изображение продукта'} 
           fill
           className="w-full h-full object-cover"
           fallback={
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <p className="text-gray-500">No image</p>
+              <p className="text-gray-500">Нет изображения</p>
             </div>
           }
         />
@@ -63,28 +69,29 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div className="text-sm font-medium text-indigo-600">
-            {product.tag ? `#${product.tag}` : 'Untagged'}
+            {/* Use getDisplayTag for consistent tag handling */}
+            #{getDisplayTag()}
           </div>
           <div className="text-xs text-black">
             {new Date(product.created_at).toLocaleDateString()}
           </div>
         </div>
         
-        <p className="text-gray-700 mb-4">{product.description || 'No description'}</p>
+        <p className="text-gray-700 mb-4">{product.description || 'Нет описания'}</p>
         
         <div className="flex justify-between">
           <button
             onClick={() => onEdit(product)}
             className="px-3 py-1 text-sm text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50"
           >
-            Edit
+            Редактировать
           </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
             className="px-3 py-1 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 disabled:opacity-50"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Удаление...' : 'Удалить'}
           </button>
         </div>
       </div>

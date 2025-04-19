@@ -124,7 +124,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-black">
-        {isEditing ? 'Edit Product' : 'Add New Product'}
+        {isEditing ? 'Изменить продукт' : 'Добавить новый продукт'}
       </h2>
       
       {error && (
@@ -136,7 +136,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="product-image" className="block text-sm font-medium text-gray-700 mb-1">
-            Product Image
+            Изображение продукта
           </label>
           {imagePreview && (
             <div className="relative h-48 mb-2 border rounded-md overflow-hidden">
@@ -147,7 +147,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
                 className="object-contain"
                 fallback={
                   <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <p className="text-gray-500">Preview not available</p>
+                    <p className="text-gray-500">Предварительный просмотр недоступен</p>
                   </div>
                 }
               />
@@ -158,14 +158,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            aria-label="Choose product image"
+            aria-label="Выберите изображение продукта"
             className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"
           />
         </div>
         
         <div className="mb-4">
           <label htmlFor="description" className="block text-sm font-medium text-black mb-1">
-            Description
+            Описание
           </label>
           <textarea
             id="description"
@@ -174,13 +174,13 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             required
             rows={3}
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Describe your product"
+            placeholder="Опишите ваш продукт"
           />
         </div>
         
         <div className="mb-6">
           <label htmlFor="tag" className="block text-sm font-medium text-black mb-1">
-            Tag
+            теги
           </label>
           <input
             id="tag"
@@ -188,7 +188,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Add a tag (optional)"
+            placeholder="Добавить тег (необязательно)"
           />
         </div>
         
@@ -198,14 +198,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Cancel
+            Отмена
           </button>
           <button
             type="submit"
             disabled={isLoading}
             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            {isLoading ? 'Saving...' : isEditing ? 'Update Product' : 'Add Product'}
+            {isLoading ? 'Сохранение...' : isEditing ? 'Обновить продукт' : 'Добавить продукт'}
           </button>
         </div>
       </form>

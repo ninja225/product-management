@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <Link href="/dashboard" className="text-xl font-bold">
-                Product Dashboard
+                Панель управления продуктом
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -33,14 +33,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href="/dashboard/profile" 
                 className="px-3 py-2 text-sm font-medium rounded-md hover:bg-indigo-700"
               >
-                Profile
+                Профиль
               </Link>
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
                 className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-700 hover:bg-indigo-800 disabled:opacity-50"
               >
-                {isLoggingOut ? 'Logging out...' : 'Logout'}
+                {isLoggingOut ? 'Выход из системы...' : 'Выйти'}
               </button>
             </div>
           </div>

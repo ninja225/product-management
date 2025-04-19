@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase'
-import ProductCard from '@/components/products/ProductCard'
+import ProductCard, { DEFAULT_TAG } from '@/components/products/ProductCard'
 import ProductForm from '@/components/products/ProductForm'
 import { Database } from '@/types/database'
 
@@ -64,11 +64,18 @@ export default function DashboardPage() {
       setFilteredRightProducts(rightProducts)
     } else {
       const normalizedFilter = tagFilter.toLowerCase().trim()
+      // Check if the filter matches the default tag
+      const isDefaultTagSearch = DEFAULT_TAG.toLowerCase().includes(normalizedFilter)
+      
       setFilteredLeftProducts(leftProducts.filter(p => 
-        p.tag?.toLowerCase().includes(normalizedFilter)
+        p.tag?.toLowerCase().includes(normalizedFilter) || 
+        // Include products with null/empty tags if searching for default tag
+        (isDefaultTagSearch && (!p.tag || p.tag.trim() === ''))
       ))
       setFilteredRightProducts(rightProducts.filter(p => 
-        p.tag?.toLowerCase().includes(normalizedFilter)
+        p.tag?.toLowerCase().includes(normalizedFilter) || 
+        // Include products with null/empty tags if searching for default tag
+        (isDefaultTagSearch && (!p.tag || p.tag.trim() === ''))
       ))
     }
   }, [tagFilter, leftProducts, rightProducts])
@@ -124,14 +131,14 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg text-gray-600">Loading...</div>
+        <div className="text-lg text-gray-600">Загрузка...</div>
       </div>
     )
   }
 
   return (
     <div className="pb-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Your Products Dashboard</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Панель управления вашими продуктами</h1>
       
       {/* Tag filter */}
       <div className="mb-6">
@@ -141,7 +148,7 @@ export default function DashboardPage() {
           </div>
           <input
             type="text"
-            placeholder="Filter by tag..."
+            placeholder="Фильтровать по тегу..."
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
             className="block w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
@@ -154,7 +161,7 @@ export default function DashboardPage() {
         {/* Left Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800">Left Display</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Левый дисплей</h2>
             <button
               onClick={() => {
                 setEditingProduct(undefined)
@@ -162,7 +169,7 @@ export default function DashboardPage() {
               }}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
-              Add Product
+              Добавить продукт
             </button>
           </div>
 
@@ -193,7 +200,7 @@ export default function DashboardPage() {
               ))
             ) : (
               <div className="col-span-full py-10 text-center text-gray-500">
-                {tagFilter ? 'No products match your filter.' : 'No products in Left Display. Add your first product!'}
+                {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет продуктов в левом дисплее. Добавьте свой первый продукт!'}
               </div>
             )}
           </div>
@@ -205,7 +212,7 @@ export default function DashboardPage() {
         {/* Right Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800">Right Display</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">Правый дисплей</h2>
             <button
               onClick={() => {
                 setEditingProduct(undefined)
@@ -213,7 +220,7 @@ export default function DashboardPage() {
               }}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
-              Add Product
+              Добавить продукт
             </button>
           </div>
 
@@ -244,7 +251,7 @@ export default function DashboardPage() {
               ))
             ) : (
               <div className="col-span-full py-10 text-center text-gray-500">
-                {tagFilter ? 'No products match your filter.' : 'No products in Right Display. Add your first product!'}
+                {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет товаров в Right Display. Добавьте свой первый товар!'}
               </div>
             )}
           </div>

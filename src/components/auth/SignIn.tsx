@@ -43,9 +43,9 @@ export default function SignIn() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900">Sign In</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Войти</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Welcome back! Sign in to your account
+            Добро пожаловать обратно! Войдите в свой аккаунт
           </p>
         </div>
         
@@ -58,7 +58,7 @@ export default function SignIn() {
         <form className="mt-8 space-y-6" onSubmit={handleSignIn}>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
+              Адрес электронной почты
             </label>
             <input
               id="email"
@@ -68,13 +68,13 @@ export default function SignIn() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="block text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Email address"
+              placeholder="Адрес электронной почты"
             />
           </div>
           
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
+              Пароль
             </label>
             <input
               id="password"
@@ -84,7 +84,7 @@ export default function SignIn() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="block w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Password"
+              placeholder="Пароль"
             />
           </div>
           
@@ -94,16 +94,16 @@ export default function SignIn() {
               disabled={isLoading}
               className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? 'Вход в систему...' : 'Войти'}
             </button>
           </div>
         </form>
         
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
+            У вас нет учетной записи?{' '}
             <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up
+              Зарегистрироваться
             </Link>
           </p>
         </div>
