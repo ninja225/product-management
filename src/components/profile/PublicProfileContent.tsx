@@ -26,12 +26,19 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
   useEffect(() => {
     const fetchUserAndProducts = async () => {
       try {
+        console.log('Fetching profile data for userId:', userId);
+        
         // Get user profile details
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('full_name, avatar_url')
           .eq('id', userId)
           .single()
+        
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          throw profileError;
+        }
         
         if (profile) {
           setUserName(profile.full_name || 'Пользователь')
@@ -41,13 +48,18 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
         }
 
         // Fetch products for the user
-        const { data: products, error } = await supabase
+        const { data: products, error: productError } = await supabase
           .from('products')
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
 
-        if (error) throw error
+        if (productError) {
+          console.error('Error fetching products:', productError);
+          throw productError;
+        }
+
+        console.log('Products fetched:', products?.length || 0);
 
         // Separate products into left and right displays
         if (products) {
@@ -65,7 +77,9 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
       }
     }
 
-    fetchUserAndProducts()
+    if (userId) {
+      fetchUserAndProducts()
+    }
   }, [userId, supabase])
 
   // Apply tag filtering
