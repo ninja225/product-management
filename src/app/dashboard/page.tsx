@@ -5,11 +5,15 @@ import { createClient } from '@/utils/supabase'
 import ProductCard, { DEFAULT_TAG } from '@/components/products/ProductCard'
 import ProductForm from '@/components/products/ProductForm'
 import { Database } from '@/types/database'
+import SupabaseImage from '@/components/ui/SupabaseImage'
 
 type Product = Database['public']['Tables']['products']['Row']
 
 export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string>('')
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [leftProducts, setLeftProducts] = useState<Product[]>([])
   const [rightProducts, setRightProducts] = useState<Product[]>([])
   const [filteredLeftProducts, setFilteredLeftProducts] = useState<Product[]>([])
@@ -28,6 +32,23 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
+        setUserEmail(user.email || '')
+        
+        // Get user profile details (name, avatar)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile) {
+          setUserName(profile.full_name || user.email?.split('@')[0] || 'Пользователь')
+          if (profile.avatar_url) {
+            setAvatarUrl(profile.avatar_url)
+          }
+        } else {
+          setUserName(user.email?.split('@')[0] || 'Пользователь')
+        }
 
         // Fetch products for the user
         const { data: products, error } = await supabase
@@ -138,38 +159,76 @@ export default function DashboardPage() {
 
   return (
     <div className="pb-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Панель управления вашими продуктами</h1>
-      
-      {/* Tag filter */}
-      <div className="mb-6">
-        <div className="relative max-w-md mx-auto">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-gray-500 text-sm">#</span>
+      {/* Header area with title and filter */}
+      <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+        {/* Search filter in place of or alongside the title */}
+        <div className="w-full md:w-auto mb-4 md:mb-0">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-gray-500 text-sm">#</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Фильтровать по тегу..."
+              value={tagFilter}
+              onChange={(e) => setTagFilter(e.target.value)}
+              className="block w-full pl-8 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Фильтровать по тегу..."
-            value={tagFilter}
-            onChange={(e) => setTagFilter(e.target.value)}
-            className="block w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
-          />
+        </div>
+        
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center">
+          <span className="sm:hidden">Продукты</span>
+          <span className="hidden sm:inline md:hidden">Управление продуктами</span>
+          <span className="hidden md:inline">Панель управления продуктами</span>
+        </h1>
+      </div>
+      
+      {/* User Profile Card - Centered above the two display sections */}
+      <div className="mb-8 max-w-md mx-auto bg-white rounded-lg shadow-md p-5 flex items-center">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-indigo-100 mr-5 border border-indigo-200 flex-shrink-0">
+          {avatarUrl ? (
+            <SupabaseImage 
+              src={avatarUrl} 
+              alt="User Avatar" 
+              className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-xl font-bold">
+                  {userName?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              }
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-xl font-bold">
+              {userName?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+          )}
+        </div>
+        <div>
+          <h2 className="font-medium text-lg text-gray-800">{userName}</h2>
+          <p className="text-sm text-gray-500">{userEmail}</p>
         </div>
       </div>
-
-      {/* Sections container - with vertical separator */}
+      
+      {/* Display sections container */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
         {/* Left Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800">Левый дисплей</h2>
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+              <span className="sm:inline md:hidden lg:hidden">Левый</span>
+              <span className="hidden sm:hidden md:inline">Левый дисплей</span>
+            </h2>
             <button
+              type="button"
               onClick={() => {
                 setEditingProduct(undefined)
                 setShowLeftForm(true)
               }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap"
             >
-              Добавить продукт
+              <span className="sm:hidden">+ Продукт</span>
+              <span className="hidden sm:inline">Добавить продукт</span>
             </button>
           </div>
 
@@ -188,7 +247,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             {filteredLeftProducts.length > 0 ? (
               filteredLeftProducts.map(product => (
                 <ProductCard
@@ -199,7 +258,7 @@ export default function DashboardPage() {
                 />
               ))
             ) : (
-              <div className="col-span-full py-10 text-center text-gray-500">
+              <div className="py-10 text-center text-gray-500">
                 {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет продуктов в левом дисплее. Добавьте свой первый продукт!'}
               </div>
             )}
@@ -211,16 +270,21 @@ export default function DashboardPage() {
 
         {/* Right Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800">Правый дисплей</h2>
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+              <span className="sm:inline md:hidden lg:hidden">Правый</span>
+              <span className="hidden sm:hidden md:inline">Правый дисплей</span>
+            </h2>
             <button
+              type="button"
               onClick={() => {
                 setEditingProduct(undefined)
                 setShowRightForm(true)
               }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 whitespace-nowrap"
             >
-              Добавить продукт
+              <span className="sm:hidden">+ Продукт</span>
+              <span className="hidden sm:inline">Добавить продукт</span>
             </button>
           </div>
 
@@ -239,7 +303,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             {filteredRightProducts.length > 0 ? (
               filteredRightProducts.map(product => (
                 <ProductCard
@@ -250,7 +314,7 @@ export default function DashboardPage() {
                 />
               ))
             ) : (
-              <div className="col-span-full py-10 text-center text-gray-500">
+              <div className="py-10 text-center text-gray-500">
                 {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет товаров в Right Display. Добавьте свой первый товар!'}
               </div>
             )}
