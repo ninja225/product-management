@@ -5,12 +5,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase'
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const supabase = createClient()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -20,12 +22,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Get user ID on mount
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    getUserId()
+  }, [supabase.auth])
   
   const handleLogout = async () => {
     setIsLoggingOut(true)
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
+  }
+
+  const handleShare = async () => {
+    if (!userId) return
+
+    const shareUrl = `${window.location.origin}/profile/${userId}`
+    await navigator.clipboard.writeText(shareUrl)
+    toast.success('Ссылка на профиль скопирована!')
   }
   
   return (
@@ -42,7 +63,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link href="/dashboard" className="flex items-center">
-                {/* Logo */}
                 <div className="relative w-8 h-8 mr-2">
                   <Image 
                     src="/logo.png" 
@@ -51,7 +71,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     className="object-contain"
                   />
                 </div>
-                {/* Enhanced site title with gradient animation */}
                 <span className={`text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r ${
                   scrolled 
                     ? 'from-indigo-700 via-blue-600 to-indigo-700' 
@@ -62,6 +81,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={handleShare}
+                className={`cursor-pointer px-3 py-2 text-sm font-medium rounded-md ${
+                  scrolled 
+                    ? 'text-indigo-600 hover:text-indigo-800' 
+                    : 'text-white hover:text-indigo-100'
+                } transition-colors duration-300`}
+              >
+                Поделиться
+              </button>
               <Link 
                 href="/dashboard/profile" 
                 className={`px-3 py-2 text-sm font-medium rounded-md ${
@@ -75,7 +104,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                className={`cursor-pointer px-3 py-2 text-sm font-medium rounded-md ${
                   scrolled 
                     ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
                     : 'bg-indigo-700 hover:bg-indigo-800'

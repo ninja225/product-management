@@ -5,13 +5,6 @@ import type { CookieOptions } from '@supabase/ssr'
 import { SUPABASE_CONFIG } from './utils/supabase-config'
 
 export async function middleware(request: NextRequest) {
-  // Early return for non-matching paths (additional optimization)
-  if (!request.nextUrl.pathname.startsWith('/dashboard') && 
-      !request.nextUrl.pathname.startsWith('/login') && 
-      !request.nextUrl.pathname.startsWith('/signup')) {
-    return NextResponse.next();
-  }
-
   const response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -19,7 +12,6 @@ export async function middleware(request: NextRequest) {
   })
 
   try {
-    // Create Supabase client specifically for middleware using the centralized config
     const supabase = createServerClient(
       SUPABASE_CONFIG.url,
       SUPABASE_CONFIG.anonKey,
@@ -29,14 +21,14 @@ export async function middleware(request: NextRequest) {
             return request.cookies.get(name)?.value
           },
           set(name: string, value: string, options: CookieOptions) {
-            response.cookies.set({
+            request.cookies.set({
               name,
               value,
               ...options,
             })
           },
           remove(name: string, options: CookieOptions) {
-            response.cookies.set({
+            request.cookies.set({
               name,
               value: '',
               ...options,
@@ -46,44 +38,33 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // Get the session first to check if it exists
-    const { data: sessionData } = await supabase.auth.getSession()
+    // Get session to check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession()
     
-    // Initialize user data to null by default
-    let isAuthenticated = false
-    let userId: string | null = null
+    // Use getUser() which verifies with the Auth server for secure user data
+    const { data: { user } } = session ? await supabase.auth.getUser() : { data: { user: null } }
     
-    // Only try to get user data if we have a session
-    if (sessionData?.session) {
-      try {
-        // Use getUser() which is more secure
-        const { data, error } = await supabase.auth.getUser()
-        
-        if (!error && data.user) {
-          isAuthenticated = true
-          userId = data.user.id
-        }
-      } catch (authError) {
-        // Ignore "Auth session missing" errors
-        if (authError instanceof Error && 
-            !authError.message.includes('Auth session missing')) {
-          console.error('Auth error:', authError.message)
-        }
-      }
-    }
+    const isAuthenticated = !!session && !!user
+    const userId = user?.id
 
-    const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
+    // Define route types
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
                        request.nextUrl.pathname.startsWith('/signup')
-    
+    const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
+    const isPublicProfileRoute = request.nextUrl.pathname.startsWith('/profile/')
+
     // If accessing home page while authenticated, redirect to dashboard
     if (isAuthenticated && request.nextUrl.pathname === '/') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
+    // Allow public access to profile pages
+    if (isPublicProfileRoute) {
+      return response
+    }
+
     // If user is not authenticated and trying to access a protected route, redirect to login
     if (!isAuthenticated && isProtectedRoute) {
-      // Preserve the original URL as a query parameter for redirecting back after login
       const redirectUrl = new URL('/login', request.url)
       redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
       return NextResponse.redirect(redirectUrl)
@@ -101,19 +82,14 @@ export async function middleware(request: NextRequest) {
 
     return response
   } catch (e) {
-    // Global error handling
     console.error('Middleware error:', e)
-    
-    // Only redirect to error page if on protected route
     if (request.nextUrl.pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/login?error=auth_error', request.url))
     }
-    
     return response
   }
 }
 
-// Keep the same matcher configuration
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/signup', '/'],
+  matcher: ['/', '/dashboard/:path*', '/login', '/signup', '/profile/:path*'],
 }
