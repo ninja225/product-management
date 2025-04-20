@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogIn, UserPlus } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -17,10 +18,12 @@ export default function Home() {
               Простая платформа для демонстрации ваших продуктов в организованных разделах. Зарегистрируйтесь сегодня и начните управлять своим инвентарем без усилий.Простая платформа для демонстрации ваших продуктов в организованных разделах. Зарегистрируйтесь сегодня и начните управлять своим инвентарем без усилий.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link href="/login" className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              <Link href="/login" className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 flex items-center gap-2">
+                <LogIn size={18} />
                 Войти
               </Link>
-              <Link href="/signup" className="text-sm font-semibold leading-6 text-gray-900">
+              <Link href="/signup" className="text-sm font-semibold leading-6 text-gray-900 flex items-center gap-2">
+                <UserPlus size={18} />
                 Завести аккаунт <span aria-hidden="true">→</span>
               </Link>
             </div>

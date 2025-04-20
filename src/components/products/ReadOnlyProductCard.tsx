@@ -1,31 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase'
 import { Database } from '@/types/database'
 import SupabaseImage from '../ui/SupabaseImage'
-import ConfirmationDialog from '../ui/ConfirmationDialog'
-import { Edit, Trash2, Tag } from 'lucide-react'
+import { Tag } from 'lucide-react'
 
 type Product = Database['public']['Tables']['products']['Row']
 
-interface ProductCardProps {
+interface ReadOnlyProductCardProps {
   product: Product
-  onDelete: (id: string) => void
-  onEdit: (product: Product) => void
   onTagClick?: (tag: string) => void
 }
 
 export const DEFAULT_TAG = 'разное'
 const MAX_DESCRIPTION_LENGTH = 50
 
-export default function ProductCard({ product, onDelete, onEdit, onTagClick }: ProductCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
+export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyProductCardProps) {
   const [showFullDescription, setShowFullDescription] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
-  const supabase = createClient()
-  
+
   useEffect(() => {
     if (product.image_url) {
       const img = new Image();
@@ -33,34 +26,6 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
       img.onload = () => setIsImageLoaded(true);
     }
   }, [product.image_url]);
-
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  }
-  
-  const handleDeleteConfirm = async () => {
-    setIsDeleting(true)
-    try {
-      if (product.image_url) {
-        const imagePath = new URL(product.image_url).pathname.split('/').pop()
-        if (imagePath) {
-          await supabase.storage.from('product_images').remove([imagePath])
-        }
-      }
-      
-      await supabase
-        .from('products')
-        .delete()
-        .eq('id', product.id)
-      
-      onDelete(product.id)
-    } catch (error) {
-      console.error('Error deleting product:', error)
-    } finally {
-      setIsDeleting(false)
-      setShowDeleteConfirm(false)
-    }
-  }
 
   const getDisplayTag = () => product.tag || DEFAULT_TAG
 
@@ -74,7 +39,6 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
 
   const description = product.description || 'Нет описания'
   const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH
-  const productTitle = product.title || description.substring(0, 30)
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group">
@@ -108,7 +72,7 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
         
         {/* Right side - Content */}
         <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col justify-between min-w-0">
-          {/* Title */}
+          {/* Title at the top */}
           {product.title && (
             <h3 className="font-medium text-gray-800 text-xs sm:text-sm md:text-base mb-1 break-words line-clamp-2">
               {product.title}
@@ -133,57 +97,21 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
             )}
           </div>
           
-          {/* Tag and date */}
+          {/* Tag and date at the bottom */}
           <div className="flex justify-between items-center py-1 sm:py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
             <button
               onClick={handleTagClick}
               className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none transition-all duration-200 transform hover:translate-x-1 flex items-center gap-1"
             >
               <Tag size={12} />
-              <span className="md:inline">{`#${getDisplayTag()}`}</span>
+              #{getDisplayTag()}
             </button>
             <div className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
               {new Date(product.created_at).toLocaleDateString()}
             </div>
           </div>
-          
-          {/* Action buttons */}
-          <div className="flex justify-between gap-2 pt-2 w-full">
-            <button
-              onClick={() => onEdit(product)}
-              title="Редактировать"
-              aria-label="Редактировать"
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md transition-all duration-200 hover:bg-indigo-50 whitespace-nowrap focus:outline-none flex items-center gap-1"
-            >
-              <Edit size={16} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Редактировать</span>
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              disabled={isDeleting}
-              title="Удалить"
-              aria-label="Удалить"
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md transition-all duration-200 hover:bg-red-600 disabled:opacity-50 whitespace-nowrap flex items-center gap-1"
-            >
-              <Trash2 size={16} className="flex-shrink-0" />
-              <span className="hidden sm:inline">{isDeleting ? 'Удаление...' : 'Удалить'}</span>
-              {isDeleting && <span className="sm:hidden">...</span>}
-            </button>
-          </div>
         </div>
       </div>
-      
-      {/* Delete confirmation dialog */}
-      <ConfirmationDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Удалить продукт"
-        message={`Вы уверены, что хотите удалить продукт "${productTitle}"? Это действие нельзя отменить.`}
-        confirmText="Удалить"
-        cancelText="Отмена"
-        isLoading={isDeleting}
-      />
     </div>
   )
 }
