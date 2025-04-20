@@ -1,9 +1,13 @@
+'use client'
+
 import { Suspense } from 'react'
+import { useParams } from 'next/navigation'
 import PublicProfileContent from '@/components/profile/PublicProfileContent'
 
-export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
-  // With async function, params.userId will be properly resolved
-  const userId = params.userId
+export default function PublicProfilePage() {
+  // Use client-side params hook instead of server component params
+  const params = useParams()
+  const userId = params.userId as string
 
   return (
     <Suspense fallback={

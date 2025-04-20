@@ -58,9 +58,8 @@ export default function SupabaseImage({
     <img
       src={src}
       alt={alt}
-      className={className}
+      className={`${className} ${fill ? 'absolute object-cover w-full h-full' : ''}`}
       onError={() => setError(true)}
-      style={fill ? { objectFit: 'cover', position: 'absolute', width: '100%', height: '100%' } : {}}
     />
   )
 }

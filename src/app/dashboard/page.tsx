@@ -6,6 +6,7 @@ import ProductCard, { DEFAULT_TAG } from '@/components/products/ProductCard'
 import ProductForm from '@/components/products/ProductForm'
 import { Database } from '@/types/database'
 import SupabaseImage from '@/components/ui/SupabaseImage'
+import { PlusCircle } from 'lucide-react'
 
 type Product = Database['public']['Tables']['products']['Row']
 
@@ -190,7 +191,7 @@ export default function DashboardPage() {
           </div>
         </div>
         
-        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center transform hover:scale-105 transition-transform duration-300">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center ">
           <span className="sm:hidden">Продукты</span>
           <span className="hidden sm:inline md:hidden">Управление продуктами</span>
           <span className="hidden md:inline">Панель управления продуктами</span>
@@ -238,9 +239,10 @@ export default function DashboardPage() {
                 setEditingProduct(undefined)
                 setShowLeftForm(true)
               }}
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
             >
-              <span className="sm:hidden">+ Продукт</span>
+              <PlusCircle size={16} />
+              <span className="sm:hidden">Продукт</span>
               <span className="hidden sm:inline">Добавить продукт</span>
             </button>
           </div>
@@ -295,9 +297,10 @@ export default function DashboardPage() {
                 setEditingProduct(undefined)
                 setShowRightForm(true)
               }}
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
             >
-              <span className="sm:hidden">+ Продукт</span>
+              <PlusCircle size={16} />
+              <span className="sm:hidden">Продукт</span>
               <span className="hidden sm:inline">Добавить продукт</span>
             </button>
           </div>

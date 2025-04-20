@@ -163,12 +163,12 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
       </div>
       
       {/* Display sections container */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative opacity-0 animate-fadeIn">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative animate-fadeIn opacity-100">
         {/* Left Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
           <div className="flex flex-wrap justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-              <span className="hidden sm:hidden md:inline">Левый дисплей</span>
+              <span className="sm:inline md:inline">Левый дисплей</span>
             </h2>
           </div>
 
@@ -196,7 +196,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
         <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
           <div className="flex flex-wrap justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-              <span className="hidden sm:hidden md:inline">Правый дисплей</span>
+              <span className="sm:inline md:inline">Правый дисплей</span>
             </h2>
           </div>
 

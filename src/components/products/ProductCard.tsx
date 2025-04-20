@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase'
 import { Database } from '@/types/database'
 import SupabaseImage from '../ui/SupabaseImage'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
+import { Edit, Trash2, Tag } from 'lucide-react'
 
 type Product = Database['public']['Tables']['products']['Row']
 
@@ -79,7 +80,7 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group">
       <div className="flex flex-row">
         {/* Left side - Image */}
-        <div className="flex items-center justify-center p-2 w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] flex-shrink-0">
+        <div className="flex items-center justify-center p-2 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] flex-shrink-0">
           <div className="relative w-full h-full border border-gray-200 rounded-md overflow-hidden bg-white flex items-center justify-center group-hover:border-indigo-200 transition-colors duration-300">
             {product.image_url ? (
               <SupabaseImage 
@@ -93,31 +94,31 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
                 height={130}
                 fallback={
                   <div className="w-full h-full flex items-center justify-center bg-gray-100 animate-pulse">
-                    <p className="text-gray-500">Ошибка загрузки</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">Ошибка загрузки</p>
                   </div>
                 }
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-100 transition-colors duration-300 group-hover:bg-gray-50">
-                <p className="text-gray-500 group-hover:text-indigo-500 transition-colors duration-300">Нет изображения</p>
+                <p className="text-gray-500 text-xs sm:text-sm group-hover:text-indigo-500 transition-colors duration-300">Нет изображения</p>
               </div>
             )}
           </div>
         </div>
         
         {/* Right side - Content */}
-        <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
+        <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col justify-between min-w-0">
           {/* Title */}
           {product.title && (
-            <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1 break-words">
+            <h3 className="font-medium text-gray-800 text-xs sm:text-sm md:text-base mb-1 break-words line-clamp-2">
               {product.title}
             </h3>
           )}
           
           {/* Description */}
-          <div className="mb-3 flex-grow">
-            <p className={`text-gray-700 text-sm sm:text-base break-words transition-all duration-300 ${
-              !showFullDescription ? 'truncate' : ''
+          <div className="mb-2 sm:mb-3 flex-grow">
+            <p className={`text-gray-700 text-xs sm:text-sm md:text-base break-words transition-all duration-300 ${
+              !showFullDescription ? 'line-clamp-2 sm:line-clamp-2' : ''
             } group-hover:text-gray-900`}>
               {description}
             </p>
@@ -125,7 +126,7 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
             {isDescriptionLong && (
               <button 
                 onClick={() => setShowFullDescription(!showFullDescription)}
-                className="cursor-pointer text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 mt-1 transition-all duration-200 hover:underline focus:outline-none"
+                className="cursor-pointer text-xs text-indigo-600 hover:text-indigo-800 mt-1 transition-all duration-200 hover:underline focus:outline-none"
               >
                 {showFullDescription ? 'Показать меньше' : 'Показать больше'}
               </button>
@@ -133,12 +134,13 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
           </div>
           
           {/* Tag and date */}
-          <div className="flex justify-between items-center py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
+          <div className="flex justify-between items-center py-1 sm:py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
             <button
               onClick={handleTagClick}
-              className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none  transition-all duration-200 transform hover:translate-x-1"
+              className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none transition-all duration-200 transform hover:translate-x-1 flex items-center gap-1"
             >
-              #{getDisplayTag()}
+              <Tag size={12} />
+              <span className="md:inline">{`#${getDisplayTag()}`}</span>
             </button>
             <div className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
               {new Date(product.created_at).toLocaleDateString()}
@@ -149,16 +151,23 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
           <div className="flex justify-between gap-2 pt-2 w-full">
             <button
               onClick={() => onEdit(product)}
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md transition-all duration-200 hover:bg-indigo-50 whitespace-nowrap focus:outline-none "
+              title="Редактировать"
+              aria-label="Редактировать"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md transition-all duration-200 hover:bg-indigo-50 whitespace-nowrap focus:outline-none flex items-center gap-1"
             >
-              Редактировать
+              <Edit size={16} className="flex-shrink-0" />
+              <span className="hidden sm:inline">Редактировать</span>
             </button>
             <button
               onClick={handleDeleteClick}
               disabled={isDeleting}
-              className=" cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md transition-all duration-200 hover:bg-red-600 disabled:opacity-50 whitespace-nowrap  "
+              title="Удалить"
+              aria-label="Удалить"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md transition-all duration-200 hover:bg-red-600 disabled:opacity-50 whitespace-nowrap flex items-center gap-1"
             >
-              {isDeleting ? 'Удаление...' : 'Удалить'}
+              <Trash2 size={16} className="flex-shrink-0" />
+              <span className="hidden sm:inline">{isDeleting ? 'Удаление...' : 'Удалить'}</span>
+              {isDeleting && <span className="sm:hidden">...</span>}
             </button>
           </div>
         </div>
