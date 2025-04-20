@@ -46,22 +46,35 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    const { data, error } = await supabase.auth.getSession()
+    // Get the session first to check if it exists
+    const { data: sessionData } = await supabase.auth.getSession()
     
-    // Handle potential Supabase errors
-    if (error) {
-      console.error('Supabase auth error:', error.message)
-      // On auth error, redirect to login as a fallback
-      if (request.nextUrl.pathname.startsWith('/dashboard')) {
-        return NextResponse.redirect(new URL('/login', request.url))
+    // Initialize user data to null by default
+    let isAuthenticated = false
+    let userId: string | null = null
+    
+    // Only try to get user data if we have a session
+    if (sessionData?.session) {
+      try {
+        // Use getUser() which is more secure
+        const { data, error } = await supabase.auth.getUser()
+        
+        if (!error && data.user) {
+          isAuthenticated = true
+          userId = data.user.id
+        }
+      } catch (authError) {
+        // Ignore "Auth session missing" errors
+        if (authError instanceof Error && 
+            !authError.message.includes('Auth session missing')) {
+          console.error('Auth error:', authError.message)
+        }
       }
-      return response
     }
 
-    const isAuthenticated = !!data.session
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
-                      request.nextUrl.pathname.startsWith('/signup')
+                       request.nextUrl.pathname.startsWith('/signup')
     
     // If accessing home page while authenticated, redirect to dashboard
     if (isAuthenticated && request.nextUrl.pathname === '/') {
@@ -82,8 +95,8 @@ export async function middleware(request: NextRequest) {
     }
 
     // Add user information to request headers for server components
-    if (isAuthenticated) {
-      response.headers.set('x-user-id', data.session.user.id)
+    if (isAuthenticated && userId) {
+      response.headers.set('x-user-id', userId)
     }
 
     return response
