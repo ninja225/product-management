@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
@@ -41,8 +42,52 @@ export default function SignUp() {
         return
       }
 
-      // After successful signup, redirect to dashboard
+      // After successful signup, show email verification toast
       if (data.user) {
+        // Display enhanced verification toast notification
+        toast.custom(
+          (t) => (
+            <div 
+              className={`${
+                t.visible ? 'animate-enter' : 'animate-leave'
+              } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 pt-0.5">
+                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500">
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-indigo-600">
+                      Аккаунт успешно создан!
+                    </p>
+                    <p className="mt-1 text-sm text-gray-700">
+                      Пожалуйста, проверьте ваш email: <span className="font-medium">{email}</span> для подтверждения регистрации.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="cursor-pointer w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+                >
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          ),
+          { 
+            duration: 8000, // Longer duration to ensure user sees it
+            position: 'top-center',
+          }
+        );
+        
+        // Navigate to dashboard after toast is shown
         router.push('/dashboard')
         router.refresh()
       }
