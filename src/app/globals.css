@@ -33,3 +33,26 @@ body {
 .page-home {
   overflow: hidden;
 }
+
+/* Gradient animation for the navbar title */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer utilities {
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+
+  .animate-gradient {
+    animation: gradient 3s ease infinite;
+  }
+}
