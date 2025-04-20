@@ -62,51 +62,61 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors">
       <div className="flex flex-row">
         {/* Left side - Image */}
-        <div className="relative h-32 min-h-[8rem] w-1/3 min-w-[120px]">
-          <SupabaseImage 
-            src={product.image_url || ''} 
-            alt={product.description || 'Изображение продукта'} 
-            fill
-            className="object-cover"
-            fallback={
-              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+        <div className="flex items-center justify-center p-2 w-[130px] h-[130px] sm:w-[150px] sm:h-[150px] flex-shrink-0">
+          <div className="relative w-full h-full border border-gray-200 rounded-md overflow-hidden bg-white flex items-center justify-center">
+            {product.image_url ? (
+              <SupabaseImage 
+                src={product.image_url} 
+                alt={description.substring(0, 30) || 'Изображение продукта'} 
+                className="max-w-full max-h-full object-contain p-1"
+                fill={false}
+                width={130}
+                height={130}
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <p className="text-gray-500">Ошибка загрузки</p>
+                  </div>
+                }
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
                 <p className="text-gray-500">Нет изображения</p>
               </div>
-            }
-          />
+            )}
+          </div>
         </div>
         
-        {/* Right side - Content */}
+        {/* Right side - Content with reorganized structure */}
         <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
-          {/* Top: Tag and date */}
-          <div className="flex justify-between items-start mb-2">
-            <div className="text-sm font-medium text-indigo-600">
-              #{getDisplayTag()}
-            </div>
-            <div className="text-xs text-black">
-              {new Date(product.created_at).toLocaleDateString()}
-            </div>
-          </div>
-          
-          {/* Middle: Description - single line with ellipsis when not expanded */}
-          <div className="mb-2 flex-grow">
+          {/* Description at the top */}
+          <div className="mb-3 flex-grow">
             <p className={`text-gray-700 text-sm sm:text-base break-words ${!showFullDescription ? 'truncate' : ''}`}>
               {description}
             </p>
             
-            {/* Show more/less button */}
+            {/* Show more/less button - now under the description */}
             {isDescriptionLong && (
               <button 
                 onClick={() => setShowFullDescription(!showFullDescription)}
-                className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 mt-1 block"
+                className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 mt-1"
               >
                 {showFullDescription ? 'Показать меньше' : 'Показать больше'}
               </button>
             )}
           </div>
           
-          {/* Bottom: Action buttons - fixed at bottom */}
-          <div className="flex justify-between gap-2 pt-2 border-t border-gray-100 w-full">
+          {/* Tag and date at the bottom */}
+          <div className="flex justify-between items-center py-2 border-t border-gray-100">
+            <div className="text-xs font-medium text-indigo-600">
+              #{getDisplayTag()}
+            </div>
+            <div className="text-xs text-gray-500">
+              {new Date(product.created_at).toLocaleDateString()}
+            </div>
+          </div>
+          
+          {/* Action buttons at the very bottom */}
+          <div className="flex justify-between gap-2 pt-2 w-full">
             <button
               onClick={() => onEdit(product)}
               className="px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 whitespace-nowrap"
