@@ -18,6 +18,7 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ userId, product, section, onComplete, onCancel }: ProductFormProps) {
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [tag, setTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
@@ -30,6 +31,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   
   useEffect(() => {
     if (product) {
+      setTitle(product.title || '')
       setDescription(product.description || '')
       setTag(product.tag || '')
       if (product.image_url) {
@@ -88,6 +90,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       
       const productData: ProductInsert = {
         user_id: userId,
+        title,
         description,
         tag,
         image_url: imageUrl,
@@ -164,6 +167,21 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         </div>
         
         <div className="mb-4">
+          <label htmlFor="title" className="block text-sm font-medium text-black mb-1">
+            названия
+          </label>
+          <input
+            id="title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Введите названия продукта"
+          />
+        </div>
+        
+        <div className="mb-4">
           <label htmlFor="description" className="block text-sm font-medium text-black mb-1">
             Описание
           </label>
@@ -171,7 +189,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
+            // required
             rows={3}
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Опишите ваш продукт"

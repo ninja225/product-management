@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase'
 import { Database } from '@/types/database'
 import SupabaseImage from '../ui/SupabaseImage'
+import ConfirmationDialog from '../ui/ConfirmationDialog'
 
 type Product = Database['public']['Tables']['products']['Row']
 
@@ -11,6 +12,7 @@ interface ProductCardProps {
   product: Product
   onDelete: (id: string) => void
   onEdit: (product: Product) => void
+  onTagClick?: (tag: string) => void
 }
 
 // Define a constant for the default tag to ensure consistency
@@ -19,14 +21,17 @@ export const DEFAULT_TAG = 'разное'
 // Define maximum description length before truncating
 const MAX_DESCRIPTION_LENGTH = 50
 
-export default function ProductCard({ product, onDelete, onEdit }: ProductCardProps) {
+export default function ProductCard({ product, onDelete, onEdit, onTagClick }: ProductCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const supabase = createClient()
   
-  const handleDelete = async () => {
-    if (!window.confirm('Вы уверены, что хотите удалить этот продукт?')) return
-    
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  }
+  
+  const handleDeleteConfirm = async () => {
     setIsDeleting(true)
     try {
       // Delete product image from storage if exists
@@ -48,15 +53,27 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
       console.error('Error deleting product:', error)
     } finally {
       setIsDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
   // Helper function to get the actual tag value (either the product tag or the default)
   const getDisplayTag = () => product.tag || DEFAULT_TAG
 
+  const handleTagClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onTagClick) {
+      onTagClick(getDisplayTag());
+    }
+  };
+
   // Helper function to handle description text and truncation
   const description = product.description || 'Нет описания'
   const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH
+
+  // Get product title for confirmation dialog
+  const productTitle = product.title || description.substring(0, 30)
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors">
@@ -67,7 +84,7 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
             {product.image_url ? (
               <SupabaseImage 
                 src={product.image_url} 
-                alt={description.substring(0, 30) || 'Изображение продукта'} 
+                alt={product.title || description.substring(0, 30) || 'Изображение продукта'} 
                 className="max-w-full max-h-full object-contain p-1"
                 fill={false}
                 width={130}
@@ -88,7 +105,14 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
         
         {/* Right side - Content with reorganized structure */}
         <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
-          {/* Description at the top */}
+          {/* Title at the top */}
+          {product.title && (
+            <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1 break-words">
+              {product.title}
+            </h3>
+          )}
+          
+          {/* Description */}
           <div className="mb-3 flex-grow">
             <p className={`text-gray-700 text-sm sm:text-base break-words ${!showFullDescription ? 'truncate' : ''}`}>
               {description}
@@ -107,9 +131,12 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
           
           {/* Tag and date at the bottom */}
           <div className="flex justify-between items-center py-2 border-t border-gray-100">
-            <div className="text-xs font-medium text-indigo-600">
+            <button
+              onClick={handleTagClick}
+              className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none"
+            >
               #{getDisplayTag()}
-            </div>
+            </button>
             <div className="text-xs text-gray-500">
               {new Date(product.created_at).toLocaleDateString()}
             </div>
@@ -124,7 +151,7 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
               Редактировать
             </button>
             <button
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               disabled={isDeleting}
               className="px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md hover:bg-red-600 disabled:opacity-50 whitespace-nowrap"
             >
@@ -133,6 +160,18 @@ export default function ProductCard({ product, onDelete, onEdit }: ProductCardPr
           </div>
         </div>
       </div>
+      
+      {/* Delete confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Удалить продукт"
+        message={`Вы уверены, что хотите удалить продукт "${productTitle}"? Это действие нельзя отменить.`}
+        confirmText="Удалить"
+        cancelText="Отмена"
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

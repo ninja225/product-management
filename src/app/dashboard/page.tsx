@@ -149,6 +149,10 @@ export default function DashboardPage() {
     setEditingProduct(undefined)
   }
 
+  const handleTagClick = (tag: string) => {
+    setTagFilter(tag);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -174,6 +178,15 @@ export default function DashboardPage() {
               onChange={(e) => setTagFilter(e.target.value)}
               className="block w-full pl-8 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
             />
+            {tagFilter && (
+              <button
+                onClick={() => setTagFilter('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                aria-label="Очистить фильтр"
+              >
+                <span className="text-xl">&times;</span>
+              </button>
+            )}
           </div>
         </div>
         
@@ -210,7 +223,7 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      {/* Display sections container */}
+      {/* Display sections container - Restored to original two-column grid on larger screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
         {/* Left Display Section */}
         <section className="bg-white p-6 rounded-lg shadow-md">
@@ -255,6 +268,7 @@ export default function DashboardPage() {
                   product={product}
                   onDelete={handleDeleteProduct}
                   onEdit={handleEditProduct}
+                  onTagClick={handleTagClick}
                 />
               ))
             ) : (
@@ -311,11 +325,12 @@ export default function DashboardPage() {
                   product={product}
                   onDelete={handleDeleteProduct}
                   onEdit={handleEditProduct}
+                  onTagClick={handleTagClick}
                 />
               ))
             ) : (
               <div className="py-10 text-center text-gray-500">
-                {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет товаров в Right Display. Добавьте свой первый товар!'}
+                {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет товаров в Right Display. Добавьте свой первый товар!' }
               </div>
             )}
           </div>

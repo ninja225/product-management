@@ -37,6 +37,7 @@ export interface Database {
           id: string
           created_at: string
           user_id: string
+          title: string | null
           image_url: string | null
           description: string | null
           tag: string | null
@@ -46,6 +47,7 @@ export interface Database {
           id?: string
           created_at?: string
           user_id: string
+          title?: string | null
           image_url?: string | null
           description?: string | null
           tag?: string | null
@@ -55,6 +57,7 @@ export interface Database {
           id?: string
           created_at?: string
           user_id?: string
+          title?: string | null
           image_url?: string | null
           description?: string | null
           tag?: string | null
