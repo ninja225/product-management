@@ -78,20 +78,55 @@ export default function ProfilePage() {
       
       // Upload new avatar if selected
       if (avatarFile) {
+        // Validate file size (max 2MB)
+        if (avatarFile.size > 2 * 1024 * 1024) {
+          throw new Error('Размер файла не должен превышать 2MB')
+        }
+
+        // Create proper file path structure
         const fileExt = avatarFile.name.split('.').pop()
         const fileName = `${uuidv4()}.${fileExt}`
         const filePath = `${userId}/${fileName}`
         
-        console.log('Uploading to path:', filePath)
+        console.log('Attempting to upload avatar to:', filePath)
         
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, avatarFile)
+        // First ensure the profile exists before uploading
+        const { error: profileCheckError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', userId)
+          .single()
           
-        if (uploadError) {
-          throw new Error(`Error uploading avatar: ${uploadError.message}`)
+        if (profileCheckError && profileCheckError.code !== 'PGRST116') {
+          // Create profile if it doesn't exist
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              full_name: fullName,
+              updated_at: new Date().toISOString(),
+            })
+            
+          if (insertError) {
+            console.error('Error creating profile:', insertError)
+            throw new Error(`Не удалось создать профиль: ${insertError.message}`)
+          }
         }
         
+        // Now upload the avatar
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, avatarFile, {
+            cacheControl: '3600',
+            upsert: true,
+          })
+          
+        if (uploadError) {
+          console.error('Upload error details:', uploadError)
+          throw new Error(`Ошибка загрузки изображения: ${uploadError.message}`)
+        }
+        
+        // Get public URL after successful upload
         const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
         newAvatarUrl = data.publicUrl
         
@@ -99,15 +134,23 @@ export default function ProfilePage() {
         
         // Delete old avatar if exists
         if (avatarUrl && !avatarUrl.startsWith('data:')) {
-          const oldAvatarPath = new URL(avatarUrl).pathname.split('/').pop()
-          if (oldAvatarPath) {
-            await supabase.storage.from('avatars').remove([`${userId}/${oldAvatarPath}`])
+          try {
+            const oldAvatarPath = new URL(avatarUrl).pathname.split('/').pop()
+            const oldUserId = new URL(avatarUrl).pathname.split('/')[new URL(avatarUrl).pathname.split('/').length - 2]
+            
+            if (oldAvatarPath && oldUserId === userId) {
+              await supabase.storage.from('avatars').remove([`${userId}/${oldAvatarPath}`])
+              console.log('Old avatar removed successfully')
+            }
+          } catch (deleteError) {
+            console.error('Error deleting old avatar (non-critical):', deleteError)
+            // Don't throw error for this - it's not critical
           }
         }
       }
       
-      // Update profile
-      const { error } = await supabase
+      // Update profile with new data
+      const { error: updateError } = await supabase
         .from('profiles')
         .upsert({
           id: userId,
@@ -116,11 +159,14 @@ export default function ProfilePage() {
           updated_at: new Date().toISOString(),
         })
         
-      if (error) throw error
+      if (updateError) {
+        console.error('Profile update error:', updateError)
+        throw new Error(`Ошибка обновления профиля: ${updateError.message}`)
+      }
       
       setMessage({ type: 'success', text: 'Профиль успешно обновлен!' })
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+      const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка'
       setMessage({ type: 'error', text: errorMessage })
       console.error('Error updating profile:', err)
     } finally {
