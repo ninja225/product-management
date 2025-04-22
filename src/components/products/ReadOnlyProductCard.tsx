@@ -42,20 +42,18 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group">
-      <div className="flex flex-row">
+      <div className="flex flex-row items-center">
         {/* Left side - Image */}
-        <div className="flex items-center justify-center p-2 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] flex-shrink-0">
-          <div className="relative w-full h-full border border-gray-200 rounded-md overflow-hidden bg-white flex items-center justify-center group-hover:border-indigo-200 transition-colors duration-300">
+        <div className="flex items-center justify-center w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] flex-shrink-0 p-2">
+          <div className="relative w-full h-full border border-gray-200 rounded-md overflow-hidden bg-white group-hover:border-indigo-200 transition-colors duration-300">
             {product.image_url ? (
               <SupabaseImage 
                 src={product.image_url} 
                 alt={product.title || description.substring(0, 30) || 'Изображение продукта'} 
-                className={`max-w-full max-h-full object-contain p-1 transition-all duration-500 ${
-                  isImageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                } group-hover:scale-105`}
-                fill={false}
-                width={130}
-                height={130}
+                className={`w-full h-full object-cover transition-all duration-500 ${
+                  isImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                fill={true}
                 fallback={
                   <div className="w-full h-full flex items-center justify-center bg-gray-100 animate-pulse">
                     <p className="text-gray-500 text-xs sm:text-sm">Ошибка загрузки</p>

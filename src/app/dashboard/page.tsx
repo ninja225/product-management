@@ -239,7 +239,7 @@ export default function DashboardPage() {
                 setEditingProduct(undefined)
                 setShowLeftForm(true)
               }}
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
             >
               <PlusCircle size={16} />
               <span className="sm:hidden">Продукт</span>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
                 setEditingProduct(undefined)
                 setShowRightForm(true)
               }}
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-orange-500 rounded-md hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
             >
               <PlusCircle size={16} />
               <span className="sm:hidden">Продукт</span>

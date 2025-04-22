@@ -20,8 +20,8 @@ interface SupabaseImageProps {
 export default function SupabaseImage({ 
   src, 
   alt, 
-  width, 
-  height, 
+  width = 500, 
+  height = 500, 
   fill = false, 
   className = '',
   fallback
@@ -38,28 +38,34 @@ export default function SupabaseImage({
     )
   }
   
-  // For data URLs (like local previews), use Next.js Image
-  if (isDataUrl) {
+  const imageClasses = `${className} ${fill ? 'object-cover w-full h-full' : ''}`
+
+  if (fill) {
     return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        fill={fill}
-        className={className}
-        onError={() => setError(true)}
-      />
+      <div className="absolute inset-0">
+        <Image
+          src={src}
+          alt={alt}
+          fill={true}
+          className={imageClasses}
+          onError={() => setError(true)}
+          sizes="100vw"
+          priority={true}
+          unoptimized={!isDataUrl} // Skip optimization for external Supabase URLs
+        />
+      </div>
     )
   }
   
-  // For Supabase URLs, use a regular img tag to avoid Next.js optimization issues
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
-      className={`${className} ${fill ? 'absolute object-cover w-full h-full' : ''}`}
+      width={width}
+      height={height}
+      className={imageClasses}
       onError={() => setError(true)}
+      unoptimized={!isDataUrl} // Skip optimization for external Supabase URLs
     />
   )
 }
