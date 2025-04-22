@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase'
 import { Database } from '@/types/database'
 import SupabaseImage from '../ui/SupabaseImage'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
-import { Edit, Trash2, Tag } from 'lucide-react'
+import { Edit, Trash2, Tag, Upload } from 'lucide-react'
 
 type Product = Database['public']['Tables']['products']['Row']
 
@@ -19,11 +19,13 @@ interface ProductCardProps {
 export const DEFAULT_TAG = 'разное'
 const MAX_DESCRIPTION_LENGTH = 50
 
-export default function ProductCard({ product, onDelete, onEdit, onTagClick }: ProductCardProps) {
+export default function ProductCard({ product, onEdit, onDelete, onTagClick }: ProductCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [isAuthor, setIsAuthor] = useState(false)
   const supabase = createClient()
   
   useEffect(() => {
@@ -32,7 +34,15 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
       img.src = product.image_url;
       img.onload = () => setIsImageLoaded(true);
     }
-  }, [product.image_url]);
+    
+    // Check if the current user is the author of this product
+    const checkAuthor = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthor(user?.id === product.user_id);
+    };
+    
+    checkAuthor();
+  }, [product.image_url, product.user_id, supabase]);
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -61,6 +71,73 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
       setShowDeleteConfirm(false)
     }
   }
+  
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Upload image to Supabase Storage with user ID in path
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${product.id}-${Date.now()}.${fileExt}`;
+      
+      console.log('Attempting to upload with path:', fileName);
+      console.log('Current user ID:', user.id);
+      
+      const { error: uploadError, data: uploadData } = await supabase.storage
+        .from('product_images')
+        .upload(fileName, file);
+        
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw new Error(`Upload error: ${uploadError.message}`);
+      }
+      
+      // Rest of function remains the same
+      if (!uploadData) {
+        throw new Error('Upload failed: No data returned');
+      }
+      
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('product_images')
+        .getPublicUrl(fileName);
+        
+      if (!urlData || !urlData.publicUrl) {
+        throw new Error('Failed to get public URL for uploaded image');
+      }
+      
+      // Update product with image URL
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ image_url: urlData.publicUrl })
+        .eq('id', product.id);
+        
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw new Error(`Update error: ${updateError.message}`);
+      }
+      
+      // Update the product in the UI by calling onEdit with updated product
+      onEdit({
+        ...product,
+        image_url: urlData.publicUrl
+      });
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   const getDisplayTag = () => product.tag || DEFAULT_TAG
 
@@ -74,7 +151,6 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
 
   const description = product.description || 'Нет описания'
   const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH
-  const productTitle = product.title || description.substring(0, 30)
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group">
@@ -98,7 +174,29 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-100 transition-colors duration-300 group-hover:bg-gray-50">
-                <p className="text-gray-500 text-xs sm:text-sm group-hover:text-indigo-500 transition-colors duration-300">Нет изображения</p>
+                {isAuthor ? (
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <label 
+                      htmlFor={`image-upload-${product.id}`}
+                      className={`cursor-pointer flex flex-col items-center justify-center w-full h-full ${isUploading ? 'pointer-events-none' : ''}`}
+                    >
+                      <Upload size={20} className="text-indigo-500 mb-1" />
+                      <p className="text-gray-500 text-xs sm:text-sm group-hover:text-indigo-500 transition-colors duration-300">
+                        {isUploading ? 'Загрузка...' : 'Добавить фото'}
+                      </p>
+                      <input 
+                        id={`image-upload-${product.id}`}
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-xs sm:text-sm group-hover:text-indigo-500 transition-colors duration-300">Нет изображения</p>
+                )}
               </div>
             )}
           </div>
@@ -123,6 +221,7 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
             
             {isDescriptionLong && (
               <button 
+                type="button"
                 onClick={() => setShowFullDescription(!showFullDescription)}
                 className="cursor-pointer text-xs text-indigo-600 hover:text-indigo-800 mt-1 transition-all duration-200 hover:underline focus:outline-none"
               >
@@ -134,6 +233,7 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
           {/* Tag and date */}
           <div className="flex justify-between items-center py-1 sm:py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
             <button
+              type="button"
               onClick={handleTagClick}
               className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none transition-all duration-200 transform hover:translate-x-1 flex items-center gap-1"
             >
@@ -147,41 +247,48 @@ export default function ProductCard({ product, onDelete, onEdit, onTagClick }: P
           
           {/* Action buttons */}
           <div className="flex justify-between gap-2 pt-2 w-full">
-            <button
-              onClick={() => onEdit(product)}
-              title="Редактировать"
-              aria-label="Редактировать"
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md transition-all duration-200 hover:bg-indigo-50 whitespace-nowrap focus:outline-none flex items-center gap-1"
-            >
-              <Edit size={16} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Редактировать</span>
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              disabled={isDeleting}
-              title="Удалить"
-              aria-label="Удалить"
-              className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md transition-all duration-200 hover:bg-red-600 disabled:opacity-50 whitespace-nowrap flex items-center gap-1"
-            >
-              <Trash2 size={16} className="flex-shrink-0" />
-              <span className="hidden sm:inline">{isDeleting ? 'Удаление...' : 'Удалить'}</span>
-              {isDeleting && <span className="sm:hidden">...</span>}
-            </button>
+            {isAuthor && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onEdit(product)}
+                  title="Редактировать"
+                  aria-label="Редактировать"
+                  className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-indigo-600 border border-indigo-600 rounded-md transition-all duration-200 hover:bg-indigo-50 whitespace-nowrap focus:outline-none flex items-center gap-1"
+                >
+                  <Edit size={16} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Редактировать</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  title="Удалить"
+                  aria-label="Удалить"
+                  className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-red-500 rounded-md transition-all duration-200 hover:bg-red-600 disabled:opacity-50 whitespace-nowrap flex items-center gap-1"
+                >
+                  <Trash2 size={16} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">{isDeleting ? 'Удаление...' : 'Удалить'}</span>
+                  {isDeleting && <span className="sm:hidden">...</span>}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
       
-      {/* Delete confirmation dialog */}
-      <ConfirmationDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Удалить продукт"
-        message={`Вы уверены, что хотите удалить продукт "${productTitle}"? Это действие нельзя отменить.`}
-        confirmText="Удалить"
-        cancelText="Отмена"
-        isLoading={isDeleting}
-      />
+      {showDeleteConfirm && (
+        <ConfirmationDialog
+          title="Удаление продукта"
+          message="Вы уверены, что хотите удалить этот продукт? Это действие нельзя отменить."
+          confirmText="Удалить"
+          cancelText="Отмена"
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          isLoading={isDeleting}
+          isOpen={showDeleteConfirm}
+        />
+      )}
     </div>
   )
 }

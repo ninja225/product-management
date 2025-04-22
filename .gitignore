@@ -19,7 +19,7 @@
 
 # production
 /build
-
+features.md
 # misc
 .DS_Store
 *.pem
