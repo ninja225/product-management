@@ -6,10 +6,9 @@ import { Database } from '@/types/database'
 import { v4 as uuidv4 } from 'uuid'
 import SupabaseImage from '../ui/SupabaseImage'
 import ProductSuggestionBox, { SuggestionProductData } from '../suggestions/ProductSuggestionBox'
-import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, Trash2 } from 'lucide-react'
+import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, } from 'lucide-react'
 import { DEFAULT_TAG } from './ProductCard'
 import { toast } from 'react-hot-toast'
-import ConfirmationDialog from '../ui/ConfirmationDialog'
 
 type Product = Database['public']['Tables']['products']['Row']
 type ProductInsert = Database['public']['Tables']['products']['Insert']
@@ -37,11 +36,6 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     tag: false,
     image: false
   })
-  
-  // For duplicate product deletion
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [duplicateProduct, setDuplicateProduct] = useState<Product | null>(null)
   
   // Refs for input elements to control focus
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -213,55 +207,6 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         
         // Removed auto-focus to description field
       }
-    }
-  }
-
-  // Handle product deletion
-  const handleDeleteClick = async (product: Product) => {
-    setDuplicateProduct(product)
-    setShowDeleteConfirm(true)
-    // Dismiss any active toasts when showing the confirmation dialog
-    toast.dismiss()
-  }
-  
-  const handleDeleteConfirm = async () => {
-    if (!duplicateProduct) return
-    
-    setIsDeleting(true)
-    try {
-      // Delete product image if exists
-      if (duplicateProduct.image_url) {
-        const imagePath = duplicateProduct.image_url.split('/').pop()
-        if (imagePath) {
-          try {
-            await supabase.storage.from('product_images').remove([`${userId}/${imagePath}`])
-          } catch (error) {
-            console.error('Error deleting product image:', error)
-            // Continue with product deletion even if image deletion fails
-          }
-        }
-      }
-      
-      // Delete the product from database
-      const { error: deleteError } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', duplicateProduct.id)
-        
-      if (deleteError) throw deleteError
-      
-      // Show success toast
-      toast.success('Продукт успешно удален')
-      
-      // Refresh form
-      onComplete()
-    } catch (err) {
-      console.error('Error deleting product:', err)
-      toast.error('Ошибка при удалении продукта')
-    } finally {
-      setIsDeleting(false)
-      setShowDeleteConfirm(false)
-      setDuplicateProduct(null)
     }
   }
 
@@ -585,20 +530,6 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           </button>
         </div>
       </form>
-
-      {/* Confirmation Dialog */}
-      {showDeleteConfirm && duplicateProduct && (
-        <ConfirmationDialog
-          isOpen={showDeleteConfirm}
-          title="Удалить продукт"
-          message="Вы уверены, что хотите удалить этот продукт? Это действие необратимо."
-          confirmText="Удалить"
-          cancelText="Отмена"
-          onConfirm={handleDeleteConfirm}
-          onClose={() => setShowDeleteConfirm(false)}
-          isLoading={isDeleting}
-        />
-      )}
     </div>
   )
 }
