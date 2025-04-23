@@ -6,9 +6,10 @@ import { Database } from '@/types/database'
 import { v4 as uuidv4 } from 'uuid'
 import SupabaseImage from '../ui/SupabaseImage'
 import ProductSuggestionBox, { SuggestionProductData } from '../suggestions/ProductSuggestionBox'
-import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, } from 'lucide-react'
+import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, Trash2 } from 'lucide-react'
 import { DEFAULT_TAG } from './ProductCard'
 import { toast } from 'react-hot-toast'
+import ConfirmationDialog from '../ui/ConfirmationDialog'
 
 type Product = Database['public']['Tables']['products']['Row']
 type ProductInsert = Database['public']['Tables']['products']['Insert']
@@ -36,6 +37,11 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     tag: false,
     image: false
   })
+  
+  // States for product deletion functionality
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [duplicateProduct, setDuplicateProduct] = useState<Product | null>(null)
   
   // Refs for input elements to control focus
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -210,6 +216,58 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     }
   }
 
+  // Handle showing the delete confirmation dialog for a duplicate product
+  const handleDeleteClick = (product: Product) => {
+    setDuplicateProduct(product)
+    setShowDeleteConfirm(true)
+    // Dismiss any active toasts when showing the confirmation dialog
+    toast.dismiss()
+  }
+  
+  // Handle confirming product deletion
+  const handleDeleteConfirm = async () => {
+    if (!duplicateProduct) return
+    
+    setIsDeleting(true)
+    try {
+      // Delete the product image if it exists
+      if (duplicateProduct.image_url) {
+        const imagePath = duplicateProduct.image_url.split('/').pop()
+        if (imagePath) {
+          try {
+            await supabase.storage
+              .from('product_images')
+              .remove([`${userId}/${imagePath}`])
+          } catch (error) {
+            console.error('Error deleting product image:', error)
+            // Continue with product deletion even if image deletion fails
+          }
+        }
+      }
+      
+      // Delete the product from the database
+      const { error: deleteError } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', duplicateProduct.id)
+      
+      if (deleteError) throw deleteError
+      
+      // Show success notification
+      toast.success('Продукт успешно удален')
+      
+      // Refresh form to continue adding the new product
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      toast.error('Ошибка при удалении продукта')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+      setDuplicateProduct(null)
+    }
+  }
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -226,24 +284,52 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       // Skip duplicate check when editing existing product
       if (!isEditing) {
         // Check if the same product exists in the other display section
-        const { exists } = await checkProductExistsInOtherSection(title)
-        if (exists) {
+        const { exists, product: duplicated } = await checkProductExistsInOtherSection(title)
+        if (exists && duplicated) {
           const otherSectionName = section === 'left' ? 'правом' : 'левом'
-          toast.error(
-            `Этот продукт уже существует в ${otherSectionName} дисплее. Удалите его оттуда перед добавлением сюда.`,
-            {
-              duration: 5000,
-              position: 'top-center',
-              style: {
-                background: '#FEE2E2',
-                color: '#B91C1C',
-                padding: '12px',
-                maxWidth: '400px',
-              },
-            }
-          )
-          setIsLoading(false)
-          return
+          
+          // Create a custom toast with a delete button
+          toast.custom((t) => (
+            <div 
+              className={`${
+                t.visible ? 'animate-enter' : 'animate-leave'
+              } max-w-md w-full bg-red-50 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 pt-0.5">
+                    <AlertCircle className="h-6 w-6 text-red-500" />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-red-800">
+                      Дублирующийся продукт
+                    </p>
+                    <p className="mt-1 text-sm text-red-700">
+                      Этот продукт уже существует в {otherSectionName} дисплее. Удалите его перед добавлением сюда.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-red-200">
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                    handleDeleteClick(duplicated);
+                  }}
+                  className="cursor-pointer w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500 hover:bg-red-100 transition-colors duration-150 focus:outline-none"
+                >
+                  <Trash2 className="h-5 w-5 mr-1" />
+                  Удалить
+                </button>
+              </div>
+            </div>
+          ), { 
+            duration: 5000, 
+            position: 'top-center',
+          });
+          
+          setIsLoading(false);
+          return;
         }
       }
 
@@ -530,6 +616,20 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           </button>
         </div>
       </form>
+      
+      {/* Confirmation Dialog for Deletion */}
+      {showDeleteConfirm && duplicateProduct && (
+        <ConfirmationDialog
+          isOpen={showDeleteConfirm}
+          title="Удалить продукт"
+          message="Вы уверены, что хотите удалить этот продукт? Это действие нельзя отменить."
+          confirmText="Удалить"
+          cancelText="Отмена"
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          isLoading={isDeleting}
+        />
+      )}
     </div>
   )
 }
