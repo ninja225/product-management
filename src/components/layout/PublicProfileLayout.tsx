@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { LogIn, UserPlus, Menu, X, Home } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -51,7 +51,8 @@ export default function PublicProfileLayout({ children }: { children: React.Reac
                     ? 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100'
                     : 'text-white hover:text-white hover:bg-indigo-700'
                 } focus:outline-none transition-colors duration-300`}
-                aria-expanded={mobileMenuOpen ? "true" : "false"}
+                aria-controls="mobile-menu"
+                aria-expanded={mobileMenuOpen}
                 aria-label="Main menu"
               >
                 {mobileMenuOpen ? (
@@ -130,6 +131,7 @@ export default function PublicProfileLayout({ children }: { children: React.Reac
         
         {/* Mobile menu, show/hide based on menu state */}
         <div 
+          id="mobile-menu"
           className={`sm:hidden transition-all duration-300 ease-in-out transform ${
             mobileMenuOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
           }`}

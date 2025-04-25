@@ -2,11 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { createClient } from '@/utils/supabase'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
-import { Share2, LogOut, Settings, Menu, X, Home, UserCircle } from 'lucide-react'
+import { Share2, LogOut, Settings, Menu, X, Home, UserCircle, Compass } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-gray-50">
       {/* Enhanced Navigation - now sticky with transition effects */}
       <nav 
-        className={` top-0 left-0 right-0 z-10 transition-all duration-300 ${
+        className={`sticky top-0 left-0 right-0 z-10 transition-all duration-300 ${
           scrolled 
             ? 'bg-white shadow-md text-indigo-700' 
             : 'bg-indigo-600 text-white'
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
-            {/* Mobile menu button - moved to left side but kept visible on small screens */}
+            {/* Mobile menu button - only visible on small screens */}
             <div className="flex items-center sm:hidden">
               <button
                 type="button"
@@ -86,7 +86,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     ? 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100'
                     : 'text-white hover:text-white hover:bg-indigo-700'
                 } focus:outline-none transition-colors duration-300`}
-                aria-expanded={mobileMenuOpen ? "true" : "false"}
+                aria-controls="mobile-menu"
+                aria-expanded={mobileMenuOpen}
                 aria-label="Main menu"
               >
                 {mobileMenuOpen ? (
@@ -97,8 +98,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
             </div>
             
-            {/* Left side links - hidden on mobile */}
-            <div className="hidden sm:flex items-center space-x-6">
+            {/* Left side links - hidden on mobile, visible on desktop */}
+            <div className="hidden sm:flex items-center space-x-6 flex-1">
               <Link 
                 href="/dashboard" 
                 className={`px-2 py-1 text-sm font-medium rounded-md flex items-center space-x-1 ${
@@ -111,20 +112,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span>Главная</span>
               </Link>
               <Link 
-                href="#" 
+                href="/explore" 
                 className={`px-2 py-1 text-sm font-medium rounded-md flex items-center space-x-1 ${
                   scrolled 
                     ? 'text-indigo-600 hover:text-indigo-800' 
                     : 'text-white hover:text-indigo-100'
                 } transition-colors duration-300`}
               >
-                <UserCircle className="w-4 h-4" />
-                <span>обнаружить</span>
+                <Compass className="w-4 h-4" />
+                <span>Обзор</span>
               </Link>
             </div>
             
             {/* Centered logo */}
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex items-center justify-center">
               <Link href="/dashboard" className="flex items-center">
                 {/* <div className="relative w-8 h-8 mr-2">
                   <Image 
@@ -145,7 +146,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             
             {/* Right side menu items */}
-            <div className="flex items-center">
+            <div className="flex items-center flex-1 justify-end">
               <div className="hidden sm:flex items-center space-x-3">
                 <button
                   type="button"
@@ -191,6 +192,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         
         {/* Mobile menu, show/hide based on menu state */}
         <div 
+          id="mobile-menu"
           className={`sm:hidden transition-all duration-300 ease-in-out transform ${
             mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
           }`}
@@ -209,6 +211,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Home className="w-5 h-5" />
               <span>Главная</span>
+            </Link>
+            <Link 
+              href="/explore" 
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block w-full text-left px-3 py-3 text-base font-medium rounded-md flex items-center space-x-3 ${
+                scrolled 
+                  ? 'text-indigo-600 hover:bg-indigo-100' 
+                  : 'text-white hover:bg-indigo-600'
+              } transition-colors duration-300`}
+            >
+              <Compass className="w-5 h-5" />
+              <span>Обзор</span>
             </Link>
             <Link 
               href="/dashboard/profile" 

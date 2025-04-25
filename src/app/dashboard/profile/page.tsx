@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase'
 import { v4 as uuidv4 } from 'uuid'
 import SupabaseImage from '@/components/ui/SupabaseImage'
-import { Edit, Camera, Image, X, ChevronDown } from 'lucide-react'
+import { Edit, Camera, Image} from 'lucide-react'
 
 export default function ProfilePage() {
   const [fullName, setFullName] = useState('')
