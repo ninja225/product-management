@@ -27,13 +27,18 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
     }
   }, [product.image_url]);
 
-  const getDisplayTag = () => product.tag || DEFAULT_TAG
+  const getDisplayTag = () => {
+    const tag = product.tag || DEFAULT_TAG;
+    // If tag already starts with #, don't add another one
+    return tag.startsWith('#') ? tag.substring(1) : tag;
+  }
 
   const handleTagClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onTagClick) {
-      onTagClick(getDisplayTag());
+      // Always pass the original tag to the handler
+      onTagClick(product.tag || DEFAULT_TAG);
     }
   };
 
@@ -102,12 +107,13 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
               className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none transition-all duration-200 transform hover:translate-x-1 flex items-center gap-1"
             >
               <Tag size={12} />
-              #{getDisplayTag()}
+              <span className="md:inline">{`#${getDisplayTag()}`}</span>
             </button>
             <div className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
               {new Date(product.created_at).toLocaleDateString()}
             </div>
           </div>
+          
         </div>
       </div>
     </div>
