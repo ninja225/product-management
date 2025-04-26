@@ -229,13 +229,13 @@ export default function DashboardPage() {
             <div className="flex space-x-6 mb-4 md:mb-0">
               <a 
                 href="/dashboard"
-                className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200 font-medium"
+                className="text-[#3d82f7] hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
               >
                 Профиль
               </a>
               <a 
                 href="#"
-                className="text-gray-600 hover:text-indigo-600 transition-colors duration-200 font-medium"
+                className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push('/404');
@@ -245,7 +245,7 @@ export default function DashboardPage() {
               </a>
               <a 
                 href="/dashboard/profile"
-                className="text-gray-600 hover:text-indigo-600 transition-colors duration-200 font-medium"
+                className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
               >
                 Настройки
               </a>
