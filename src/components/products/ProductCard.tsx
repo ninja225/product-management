@@ -234,14 +234,14 @@ export default function ProductCard({
                     <div className="flex flex-col items-center justify-center w-full h-full">
                       {isUploading ? (
                         <div className="flex flex-col items-center justify-center w-full h-full">
-                          <Loader2 size={24} className="text-indigo-500 mb-1 animate-spin" />
+                          <Loader2 size={24} className="text-[#3d82f7] mb-1 animate-spin" />
                           <p className="text-gray-500 text-xs sm:text-sm text-center">
                             Загрузка... {uploadProgress}%
                           </p>
                           {uploadProgress > 0 && (
                             <div className="w-4/5 mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-indigo-500 transition-all duration-200" 
+                                className="h-full bg-[#3d82f7] transition-all duration-200" 
                                 style={{ width: `${uploadProgress}%` }} 
                               />
                             </div>
