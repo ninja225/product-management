@@ -7,16 +7,6 @@ import { useState, useEffect } from 'react'
 
 export default function PublicProfileLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  
-  // Handle scroll effect for navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
   
   // Close mobile menu when window is resized to desktop size
   useEffect(() => {
