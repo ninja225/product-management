@@ -115,8 +115,8 @@ export default function ProductCard({
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${product.id}-${Date.now()}.${fileExt}`;
       
-      console.log('Attempting to upload with path:', fileName);
-      console.log('Current user ID:', user.id);
+      // console.log('Attempting to upload with path:', fileName);
+      // console.log('Current user ID:', user.id);
       
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -296,9 +296,9 @@ export default function ProductCard({
                         setShowDropdown(false);
                         onEdit(product);
                       }}
-                      className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-indigo-50 transition-colors duration-150 text-gray-700 hover:text-indigo-700 cursor-pointer"
+                      className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-indigo-50 transition-colors duration-150 text-gray-700 hover:text-[#3d82f7] cursor-pointer"
                     >
-                      <Edit size={15} className="text-indigo-500" />
+                      <Edit size={15} className="text-[#3d82f7]" />
                       <span>Редактировать</span>
                     </button>
                     <button

@@ -288,7 +288,7 @@ export default function DashboardPage() {
             {/* Left Display Section - like interests */}
             <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
               {/* Rounded top border for "like" section */}
-              <div className="absolute top-0 left-0 right-0 h-3 bg-green-500 rounded-t-lg"></div>
+              <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
               
               <div className="flex flex-wrap justify-between items-center mb-4 gap-2 pt-2">
                 <div className="flex items-center gap-2">
@@ -358,7 +358,7 @@ export default function DashboardPage() {
             {/* Right Display Section dislike interests */}
             <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
               {/* Rounded top border for "dislike" section */}
-              <div className="absolute top-0 left-0 right-0 h-3 bg-red-500 rounded-t-lg"></div>
+              <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
               
               <div className="flex flex-wrap justify-between items-center mb-4 gap-2 pt-2">
                 <div className="flex items-center gap-2">
