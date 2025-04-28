@@ -290,13 +290,13 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       if (deleteError) throw deleteError
       
       // Show success notification
-      toast.success('Продукт успешно удален')
+      toast.success('Интерес успешно удален')
       
       // Refresh form to continue adding the new product
       setIsLoading(false)
     } catch (error) {
       console.error('Error deleting product:', error)
-      toast.error('Ошибка при удалении продукта')
+      toast.error('Ошибка при удалении интереса')
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)
@@ -309,7 +309,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     e.preventDefault()
     
     if (!title.trim()) {
-      setError('Пожалуйста, введите название продукта')
+      setError('Пожалуйста, введите название интереса')
       return
     }
     
@@ -344,7 +344,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           } else {
             // Exact duplicate - show error and prevent submission
             toast.error(
-              `Продукт с таким названием уже существует в этом разделе.`,
+              `Интерес с таким названием уже существует в этом разделе.`,
               {
                 duration: 5000,
                 position: 'top-center',
@@ -357,7 +357,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         } else if (exists) {
           // Product exists but we couldn't fetch details
           toast.error(
-            `Продукт с таким названием уже существует в этом разделе.`,
+            `Интерес с таким названием уже существует в этом разделе.`,
             {
               duration: 5000,
               position: 'top-center',
@@ -387,10 +387,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
                   </div>
                   <div className="ml-3 flex-1">
                     <p className="text-sm font-medium text-red-800">
-                      Дублирующийся продукт
+                      Дублирующийся Интересы
                     </p>
                     <p className="mt-1 text-sm text-red-700">
-                      Этот продукт уже существует в {otherSectionName} дисплее. Удалите его перед добавлением сюда.
+                      Этот Интерес уже существует в {otherSectionName} разделе. Удалите его перед добавлением сюда.
                     </p>
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-black">
-        {isEditing ? 'Изменить продукт' : 'Добавить новый продукт'}
+        {isEditing ? 'Изменить интерес' : 'Добавить новый интерес'}
       </h2>
       
       {error && (
@@ -533,7 +533,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               onChange={handleTitleChange}
               required
               ref={titleInputRef}
-              placeholder="Введите названия продукта"
+              placeholder="Введите названия интереса"
               className={`w-full text-black px-3 py-2 border ${
                 productFromDb ? 'border-indigo-300' : 'border-gray-300'
               } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
@@ -578,7 +578,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             }}
             rows={3}
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Опишите ваш продукт"
+            placeholder="Опишите ваш интерес"
           />
         </div>
         
@@ -587,7 +587,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           <label htmlFor="tag" className="block text-sm font-medium text-black mb-1 flex items-center gap-2">
             <span>теги</span>
             {lockedFields.tag && (
-              <Lock size={14} className="text-indigo-500" aria-label="Это поле заблокировано, так как продукт из базы данных" />
+              <Lock size={14} className="text-indigo-500" aria-label="Это поле заблокировано, так как Интерес из базы данных" />
             )}
           </label>
           <div className="relative">
@@ -624,9 +624,9 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         {/* Image section */}
         <div className="mb-4 relative">
           <label htmlFor="product-image" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <span>Изображение продукта</span>
+            <span>Изображение интереса</span>
             {lockedFields.image && (
-              <Lock size={14} className="text-indigo-500" aria-label="Изображение заблокировано, так как продукт из базы данных" />
+              <Lock size={14} className="text-indigo-500" aria-label="Изображение заблокировано, так как Интереса из базы данных" />
             )}
           </label>
           {imagePreview && (
@@ -659,7 +659,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             accept="image/*"
             onChange={handleImageChange}
             disabled={lockedFields.image}
-            aria-label="Выберите изображение продукта"
+            aria-label="Выберите изображение Интереса"
             className={`w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${
               lockedFields.image 
               ? 'file:bg-gray-100 file:text-gray-400 cursor-not-allowed opacity-75' 
@@ -696,7 +696,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             ) : (
               <>
                 <Save size={16} />
-                <span>{isEditing ? 'Обновить продукт' : 'Добавить продукт'}</span>
+                <span>{isEditing ? 'Обновить интерес' : 'Добавить интерес'}</span>
               </>
             )}
           </button>
@@ -707,8 +707,8 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       {showDeleteConfirm && duplicateProduct && (
         <ConfirmationDialog
           isOpen={showDeleteConfirm}
-          title="Удалить продукт"
-          message="Вы уверены, что хотите удалить этот продукт? Это действие нельзя отменить."
+          title="Удалить интерес"
+          message="Вы уверены, что хотите удалить этот интерес? Это действие нельзя отменить."
           confirmText="Удалить"
           cancelText="Отмена"
           onConfirm={handleDeleteConfirm}

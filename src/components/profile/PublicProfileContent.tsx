@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase'
 import SupabaseImage from '@/components/ui/SupabaseImage'
 import ReadOnlyProductCard from '@/components/products/ReadOnlyProductCard'
-import { User, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import Image from 'next/image'
 
 interface Product {
@@ -170,7 +170,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
       {/* Full-width container matched to grid sections */}
       <div className="max-w-7xl mx-auto px-4">
         {/* Cover image section */}
-        <div className="rounded-lg relative w-full h-64 mb-8">
+        <div className="rounded-lg relative w-full h-64">
           {coverImageUrl ? (
             <SupabaseImage 
               src={coverImageUrl} 
@@ -204,13 +204,13 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                 </div>
               )}
             </div>
-            <h2 className="font-medium text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">{userName}</h2>
-            {username && (
+            <h2 className="font-medium text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">{userName}</h2>
+            {/* {username && (
               <div className="mt-1 px-3 py-1 bg-black/30 rounded-full text-white text-sm flex items-center">
                 <User size={14} className="mr-1" />
                 <span>@{username}</span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       
@@ -218,7 +218,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
         <div className="bg-white shadow py-4 px-2 sticky top-0 z-10 rounded-lg mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Profile interests title */}
-            <div className="mb-4 md:mb-0">
+            <div className="pl-4 mb-4 md:mb-0">
               <h1 className="text-lg font-medium text-black">
                 Интересы профиля {username ? `@${username}` : userName}
               </h1>
@@ -289,7 +289,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                   ))
                 ) : (
                   <div className="py-10 text-center text-gray-500 animate-pulse">
-                    {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет продуктов в левом дисплее.'}
+                    {tagFilter ? 'Ни один интерес не соответствует вашему фильтру.' : 'Нет интересов в разделе "Нравится".'}
                   </div>
                 )}
               </div>
@@ -329,7 +329,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                   ))
                 ) : (
                   <div className="py-10 text-center text-gray-500 animate-pulse">
-                    {tagFilter ? 'Ни один продукт не соответствует вашему фильтру.' : 'Нет товаров в правом дисплее.'}
+                    {tagFilter ? 'Ни один интерес не соответствует вашему фильтру.' : 'Нет интересов в разделе "Не Нравится".'}
                   </div>
                 )}
               </div>

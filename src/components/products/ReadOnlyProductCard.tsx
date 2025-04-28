@@ -57,7 +57,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
               {product.image_url ? (
                 <SupabaseImage 
                   src={product.image_url} 
-                  alt={product.title || description.substring(0, 30) || 'Изображение продукта'} 
+                  alt={product.title || description.substring(0, 30) || 'Изображение интереса'} 
                   className={`w-full h-full object-cover transition-all duration-500 ${
                     isImageLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
