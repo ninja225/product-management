@@ -177,11 +177,11 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
               alt="Profile Cover" 
               className="w-full h-full object-cover rounded-lg"
               fallback={
-                <div className="rounded-lg w-full h-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div className="rounded-lg w-full h-full bg-gradient-to-r from-[#3d82f7] to-purple-600"></div>
               }
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg"></div>
+            <div className="w-full h-full bg-gradient-to-r from-[#3d82f7] to-purple-600 rounded-lg"></div>
           )}
           
           {/* Centered avatar and username with text shadow */}
@@ -228,14 +228,14 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
             <div className="w-full md:w-64">
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 text-sm group-focus-within:text-indigo-500 transition-colors duration-200">#</span>
+                  <span className="text-gray-500 text-sm group-focus-within:text-[#3d82f7] transition-colors duration-200">#</span>
                 </div>
                 <input
                   type="text"
                   placeholder="Фильтровать по тегу..."
                   value={tagFilter}
                   onChange={(e) => setTagFilter(e.target.value)}
-                  className="block w-full pl-8 pr-12 py-2 border border-gray-300 rounded-full shadow-sm focus:border-indigo-500 text-black transition-all duration-200 ease-in-out hover:border-indigo-300"
+                  className="block w-full pl-8 pr-12 py-2 border border-gray-300 rounded-full shadow-sm focus:border-[#3d82f7] text-black transition-all duration-200 ease-in-out hover:border-indigo-300"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center">
                   {tagFilter ? (

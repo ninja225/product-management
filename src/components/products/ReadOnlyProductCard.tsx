@@ -70,7 +70,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100 transition-colors duration-300 group-hover:bg-gray-50">
-                  <p className="text-gray-500 text-xs sm:text-sm group-hover:text-indigo-500 transition-colors duration-300">Нет изображения</p>
+                  <p className="text-gray-500 text-xs sm:text-sm group-hover:text-[#3d82f7] transition-colors duration-300">Нет изображения</p>
                 </div>
               )}
             </div>
