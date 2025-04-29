@@ -6,7 +6,6 @@ import { Database } from '@/types/database'
 import { v4 as uuidv4 } from 'uuid'
 import SupabaseImage from '../ui/SupabaseImage'
 import ProductSuggestionBox, { SuggestionProductData } from '../suggestions/ProductSuggestionBox'
-import TagSuggestionBox, { SuggestionTagData } from '../suggestions/TagSuggestionBox'
 import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, Trash2 } from 'lucide-react'
 import { DEFAULT_TAG } from './ProductCard'
 import { toast } from 'react-hot-toast'
@@ -32,7 +31,6 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false)
-  const [isSearchingTagSuggestions, setIsSearchingTagSuggestions] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [productFromDb, setProductFromDb] = useState<SuggestionProductData | null>(null)
   const [lockedFields, setLockedFields] = useState({
@@ -69,20 +67,18 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     }
   }, [product])
 
-  // Handle tag changes - strip # and commas if user adds them
+  // Handle tag changes - strip # if user adds it
   const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!lockedFields.tag) {
       const value = e.target.value
       
-      // Remove # symbol and commas if user types them
+      // Remove # symbol if user types it
       const cleanTag = value.startsWith('#') ? value.substring(1) : value
-      const tagWithoutCommas = cleanTag.replace(/,/g, '')
-      
-      setTagWithoutHash(tagWithoutCommas)
+      setTagWithoutHash(cleanTag)
       
       // Store the tag value - we'll add the # only during submission
       // Don't add # here to prevent duplicates
-      setTag(tagWithoutCommas)
+      setTag(cleanTag)
     }
   }
   
@@ -292,13 +288,13 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       if (deleteError) throw deleteError
       
       // Show success notification
-      toast.success('Интерес успешно удален')
+      toast.success('Продукт успешно удален')
       
       // Refresh form to continue adding the new product
       setIsLoading(false)
     } catch (error) {
       console.error('Error deleting product:', error)
-      toast.error('Ошибка при удалении интереса')
+      toast.error('Ошибка при удалении продукта')
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)
@@ -311,7 +307,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     e.preventDefault()
     
     if (!title.trim()) {
-      setError('Пожалуйста, введите название интереса')
+      setError('Пожалуйста, введите название продукта')
       return
     }
     
@@ -346,7 +342,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           } else {
             // Exact duplicate - show error and prevent submission
             toast.error(
-              `Интерес с таким названием уже существует в этом разделе.`,
+              `Продукт с таким названием уже существует в этом разделе.`,
               {
                 duration: 5000,
                 position: 'top-center',
@@ -359,7 +355,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         } else if (exists) {
           // Product exists but we couldn't fetch details
           toast.error(
-            `Интерес с таким названием уже существует в этом разделе.`,
+            `Продукт с таким названием уже существует в этом разделе.`,
             {
               duration: 5000,
               position: 'top-center',
@@ -389,10 +385,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
                   </div>
                   <div className="ml-3 flex-1">
                     <p className="text-sm font-medium text-red-800">
-                      Дублирующийся Интересы
+                      Дублирующийся продукт
                     </p>
                     <p className="mt-1 text-sm text-red-700">
-                      Этот Интерес уже существует в {otherSectionName} разделе. Удалите его перед добавлением сюда.
+                      Этот продукт уже существует в {otherSectionName} дисплее. Удалите его перед добавлением сюда.
                     </p>
                   </div>
                 </div>
@@ -499,23 +495,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     }
   }
   
-  // Handle tag suggestions found
-  const handleTagSuggestionsFound = (suggestions: SuggestionTagData[] | null, isSearching: boolean) => {
-    setIsSearchingTagSuggestions(isSearching)
-  }
-
-  // Handle tag selection from suggestions
-  const handleTagSelect = (selectedTag: string) => {
-    if (!lockedFields.tag) {
-      setTagWithoutHash(selectedTag)
-      setTag(selectedTag)
-    }
-  }
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-black">
-        {isEditing ? 'Изменить интерес' : 'Добавить новый интерес'}
+        {isEditing ? 'Изменить продукт' : 'Добавить новый продукт'}
       </h2>
       
       {error && (
@@ -533,7 +516,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               названия
             </label>
             {isSearchingSuggestions && (
-              <span className="text-xs text-[#3d82f7]  flex items-center gap-1">
+              <span className="text-xs text-indigo-600 flex items-center gap-1">
                 <RefreshCw size={12} className="animate-spin" />
                 Поиск совпадений...
               </span>
@@ -548,10 +531,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               onChange={handleTitleChange}
               required
               ref={titleInputRef}
-              placeholder="Введите названия интереса"
+              placeholder="Введите названия продукта"
               className={`w-full text-black px-3 py-2 border ${
                 productFromDb ? 'border-indigo-300' : 'border-gray-300'
-              } rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7] ${
+              } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
                 isSearchingSuggestions ? 'bg-gray-50' : ''
               }`}
             />
@@ -564,7 +547,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           </div>
           
           {productFromDb && (
-            <div className="mt-1 text-xs text-[#3d82f7]  flex items-center gap-1">
+            <div className="mt-1 text-xs text-indigo-600 flex items-center gap-1">
               <Info size={12} />
               <span>автоматически заполнена</span>
             </div>
@@ -592,8 +575,8 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               setDescription(e.target.value)
             }}
             rows={3}
-            className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7]"
-            placeholder="Опишите ваш интерес"
+            className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Опишите ваш продукт"
           />
         </div>
         
@@ -602,13 +585,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           <label htmlFor="tag" className="block text-sm font-medium text-black mb-1 flex items-center gap-2">
             <span>теги</span>
             {lockedFields.tag && (
-              <Lock size={14} className="text-[#3d82f7]" aria-label="Это поле заблокировано, так как Интерес из базы данных" />
-            )}
-            {isSearchingTagSuggestions && (
-              <span className="text-xs text-[#3d82f7]  flex items-center gap-1">
-                <RefreshCw size={12} className="animate-spin" />
-                Поиск тегов...
-              </span>
+              <Lock size={14} className="text-indigo-500" aria-label="Это поле заблокировано, так как продукт из базы данных" />
             )}
           </label>
           <div className="relative">
@@ -624,28 +601,16 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               className={`w-full text-black pl-8 pr-3 py-2 border ${
                 lockedFields.tag ? 'bg-gray-50 border-indigo-200 cursor-not-allowed' : 'border-gray-300'
               } rounded-md shadow-sm focus:outline-none ${
-                !lockedFields.tag ? 'focus:ring-[#3d82f7] focus:border-[#3d82f7]' : ''
-              } ${isSearchingTagSuggestions ? 'bg-gray-50' : ''}`}
+                !lockedFields.tag ? 'focus:ring-indigo-500 focus:border-indigo-500' : ''
+              }`}
               placeholder="Добавить тег (без символа #)"
             />
-            {isSearchingTagSuggestions && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 size={16} className="text-gray-400 animate-spin" />
-              </div>
-            )}
           </div>
           {!lockedFields.tag && (
-            <>
-              <p className="mt-1 text-xs text-[#3d82f7]  flex items-center gap-1">
-                <Info size={12} />
-                <span>Символ # добавляется автоматически</span>
-              </p>
-              <TagSuggestionBox 
-                inputValue={tagWithoutHash}
-                onSelectTag={handleTagSelect}
-                onFindMatches={handleTagSuggestionsFound}
-              />
-            </>
+            <p className="mt-1 text-xs text-indigo-600 flex items-center gap-1">
+              <Info size={12} />
+              <span>Символ # добавляется автоматически</span>
+            </p>
           )}
           {lockedFields.tag && (
             <p className="mt-1 text-xs text-gray-500">
@@ -657,9 +622,9 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         {/* Image section */}
         <div className="mb-4 relative">
           <label htmlFor="product-image" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <span>Изображение интереса</span>
+            <span>Изображение продукта</span>
             {lockedFields.image && (
-              <Lock size={14} className="text-[#3d82f7]" aria-label="Изображение заблокировано, так как Интереса из базы данных" />
+              <Lock size={14} className="text-indigo-500" aria-label="Изображение заблокировано, так как продукт из базы данных" />
             )}
           </label>
           {imagePreview && (
@@ -679,7 +644,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               />
               {productFromDb && productFromDb.image_url === imagePreview && (
                 <div className="absolute top-2 right-2">
-                  <span className="bg-indigo-100 text-[#3d82f7] text-xs px-2 py-1 rounded-md">
+                  <span className="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded-md">
                     Из базы данных
                   </span>
                 </div>
@@ -692,11 +657,11 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             accept="image/*"
             onChange={handleImageChange}
             disabled={lockedFields.image}
-            aria-label="Выберите изображение Интереса"
+            aria-label="Выберите изображение продукта"
             className={`w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${
-              lockedFields.image 
+              lockedFields.image
               ? 'file:bg-gray-100 file:text-gray-400 cursor-not-allowed opacity-75' 
-              : 'file:bg-indigo-50 file:text-[#3d82f7] hover:file:bg-indigo-100 cursor-pointer'
+              : 'file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 cursor-pointer'
             }`}
           />
           {lockedFields.image && (
@@ -711,7 +676,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           <button
             type="button"
             onClick={onCancel}
-            className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3d82f7] flex items-center space-x-2"
+            className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center space-x-2"
           >
             <X size={16} />
             <span>Отмена</span>
@@ -719,7 +684,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           <button
             type="submit"
             disabled={isLoading || isSearchingSuggestions}
-            className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-[#3d82f7]  border border-transparent rounded-md shadow-sm hover:bg-[#2d6ce0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3d82f7] disabled:opacity-50 flex items-center space-x-2"
+            className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center space-x-2"
           >
             {isLoading ? (
               <>
@@ -729,7 +694,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             ) : (
               <>
                 <Save size={16} />
-                <span>{isEditing ? 'Обновить интерес' : 'Добавить интерес'}</span>
+                <span>{isEditing ? 'Обновить продукт' : 'Добавить продукт'}</span>
               </>
             )}
           </button>
@@ -740,8 +705,8 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       {showDeleteConfirm && duplicateProduct && (
         <ConfirmationDialog
           isOpen={showDeleteConfirm}
-          title="Удалить интерес"
-          message="Вы уверены, что хотите удалить этот интерес? Это действие нельзя отменить."
+          title="Удалить продукт"
+          message="Вы уверены, что хотите удалить этот продукт? Это действие нельзя отменить."
           confirmText="Удалить"
           cancelText="Отмена"
           onConfirm={handleDeleteConfirm}
