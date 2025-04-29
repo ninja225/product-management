@@ -96,7 +96,7 @@ const TagSuggestionBox = ({ inputValue, onSelectTag, onFindMatches }: TagSuggest
           .from('products')
           .select('tag')
           .not('tag', 'is', null)
-          .ilike('tag', `%${inputValue}%`) // Case-insensitive search that contains the input
+          .ilike('tag', `%${normalizedInput}%`) // Use normalized input for consistent case-insensitive search
         
         if (error) throw error
         
@@ -118,7 +118,8 @@ const TagSuggestionBox = ({ inputValue, onSelectTag, onFindMatches }: TagSuggest
           // Convert to array and sort by frequency
           const suggestions = Object.entries(tagsWithCount)
             .map(([tag, count]) => ({ 
-              tag, // Keep original case
+              // Use original case from data for display but ensure unique by lowercase key
+              tag: data.find(item => item.tag?.toLowerCase() === tag)?.tag || tag, 
               count 
             }))
             .sort((a, b) => b.count - a.count) // Sort by most used first
