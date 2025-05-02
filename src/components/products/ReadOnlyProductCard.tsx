@@ -215,7 +215,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
       };
       
       // Insert the product into the user's collection
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('products')
         .insert(newProduct)
         .select();
