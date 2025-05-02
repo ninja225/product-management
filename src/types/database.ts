@@ -18,6 +18,7 @@ export interface Database {
           updated_at: string | null
           created_at: string
           username: string | null
+          is_public?: boolean
         }
         Insert: {
           id: string
@@ -27,6 +28,7 @@ export interface Database {
           updated_at?: string | null
           created_at?: string
           username?: string | null
+          is_public?: boolean
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export interface Database {
           updated_at?: string | null
           created_at?: string
           username?: string | null
+          is_public?: boolean
         }
       }
       products: {

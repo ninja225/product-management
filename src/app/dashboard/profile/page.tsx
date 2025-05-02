@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase'
 import { v4 as uuidv4 } from 'uuid'
 import SupabaseImage from '@/components/ui/SupabaseImage'
-import { Edit, Camera, Image, User, Check, X, AlertCircle, Loader2 } from 'lucide-react'
+import { Edit, Camera, Image, User, Check, X, AlertCircle, Loader2, Globe, Lock } from 'lucide-react'
 import { debounce } from 'lodash'
 import toast from 'react-hot-toast'
 
@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
+  const [isPublic, setIsPublic] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -87,6 +88,9 @@ export default function ProfilePage() {
             setOriginalUsername(profile.username)
           }
           
+          // Set is_public value (default to true if not set)
+          setIsPublic(profile.is_public !== false)
+          
           // Debug: Log the avatar URL
           // console.log('Avatar URL from database:', profile.avatar_url)
           // console.log('Cover Image URL from database:', profile.cover_image_url)
@@ -107,6 +111,7 @@ export default function ProfilePage() {
             full_name: sessionProfile.full_name || '',
             username: sessionProfile.username || null,
             updated_at: new Date().toISOString(),
+            is_public: true, // Default to public profile
           };
           
           const { error: updateError } = await supabase
@@ -373,6 +378,7 @@ export default function ProfilePage() {
               id: userId,
               full_name: fullName,
               updated_at: new Date().toISOString(),
+              is_public: isPublic,
             })
             
           if (insertError) {
@@ -475,6 +481,7 @@ export default function ProfilePage() {
           username: username || null,
           avatar_url: newAvatarUrl,
           cover_image_url: newCoverImageUrl,
+          is_public: isPublic,
           updated_at: new Date().toISOString(),
         })
         .eq('id', userId)
@@ -690,6 +697,66 @@ export default function ProfilePage() {
               Ваш профиль будет доступен по адресу: {window.location.origin}/profile/{username}
             </p>
           )}
+        </div>
+
+        {/* Profile Visibility Toggle */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Видимость профиля
+          </label>
+          <div className="mt-2 space-y-3">
+            <div 
+              className={`flex items-center p-3 border rounded-md cursor-pointer transition-all ${
+                isPublic 
+                  ? 'border-[#3d82f7] bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onClick={() => setIsPublic(true)}
+            >
+              <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                isPublic ? 'border-[#3d82f7] bg-[#3d82f7]' : 'border-gray-400'
+              }`}>
+                {isPublic && <Check size={12} className="text-white" />}
+              </div>
+              <div className="ml-3 flex items-center">
+                <Globe size={18} className={`mr-2 ${isPublic ? 'text-[#3d82f7]' : 'text-gray-500'}`} />
+                <div>
+                  <p className={`text-sm font-medium ${isPublic ? 'text-[#3d82f7]' : 'text-gray-700'}`}>
+                    Публичный профиль
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Ваш профиль будет виден в разделе &quot;Открытие&quot; и доступен для всех пользователей
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div 
+              className={`flex items-center p-3 border rounded-md cursor-pointer transition-all ${
+                !isPublic 
+                  ? 'border-[#3d82f7] bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onClick={() => setIsPublic(false)}
+            >
+              <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                !isPublic ? 'border-[#3d82f7] bg-[#3d82f7]' : 'border-gray-400'
+              }`}>
+                {!isPublic && <Check size={12} className="text-white" />}
+              </div>
+              <div className="ml-3 flex items-center">
+                <Lock size={18} className={`mr-2 ${!isPublic ? 'text-[#3d82f7]' : 'text-gray-500'}`} />
+                <div>
+                  <p className={`text-sm font-medium ${!isPublic ? 'text-[#3d82f7]' : 'text-gray-700'}`}>
+                    Приватный профиль
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Ваш профиль будет скрыт из раздела &quot;Открытие&quot;, но останется доступным по прямой ссылке
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
         {/* Submit Button */}

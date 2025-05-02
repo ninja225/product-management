@@ -53,11 +53,27 @@ export async function middleware(request: NextRequest) {
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
                        request.nextUrl.pathname.startsWith('/signup')
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
+    const isExploreRoute = request.nextUrl.pathname.startsWith('/explore')
     const isPublicProfileRoute = request.nextUrl.pathname.startsWith('/profile/')
 
     // If accessing home page while authenticated, redirect to dashboard
     if (isAuthenticated && request.nextUrl.pathname === '/') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // If user is not authenticated and trying to access a protected route, redirect to login
+    if (!isAuthenticated && isProtectedRoute) {
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // If user is not authenticated and trying to access the explore route, allow them through
+    // but flag that they are visiting as a guest for the layout to handle appropriately
+    if (!isAuthenticated && isExploreRoute) {
+      // Allow access but set a header to indicate guest status
+      response.headers.set('x-guest-access', 'true')
+      return response
     }
 
     // Handle public profile routes - support for both username and userId lookups
@@ -70,34 +86,52 @@ export async function middleware(request: NextRequest) {
           // First try to find profile by username
           const { data: profileByUsername } = await supabase
             .from('profiles')
-            .select('id')
+            .select('id, is_public')
             .eq('username', profileIdentifier)
             .single()
             
           if (profileByUsername) {
-            // If we found a profile by username, set the user ID in the request headers
-            response.headers.set('x-profile-id', profileByUsername.id)
-            response.headers.set('x-profile-type', 'username')
-            return response
+            // Check if profile is public or if the current user is the profile owner
+            const isOwner = isAuthenticated && userId === profileByUsername.id
+            const isPublic = profileByUsername.is_public !== false
+            
+            if (isPublic || isOwner) {
+              // If we found a profile by username, set the user ID in the request headers
+              response.headers.set('x-profile-id', profileByUsername.id)
+              response.headers.set('x-profile-type', 'username')
+              return response
+            } else {
+              // Profile is private and user is not the owner
+              return NextResponse.redirect(new URL('/not-found', request.url))
+            }
           }
           
           // If not found by username, try to find by user ID
           const { data: profileById } = await supabase
             .from('profiles')
-            .select('id, username')
+            .select('id, username, is_public')
             .eq('id', profileIdentifier)
             .single()
             
           if (profileById) {
-            // If user has a username, redirect to the username-based URL
-            if (profileById.username) {
-              return NextResponse.redirect(new URL(`/profile/${profileById.username}`, request.url))
-            }
+            // Check if profile is public or if the current user is the profile owner
+            const isOwner = isAuthenticated && userId === profileById.id
+            const isPublic = profileById.is_public !== false
             
-            // Otherwise just set the user ID in the request headers
-            response.headers.set('x-profile-id', profileById.id)
-            response.headers.set('x-profile-type', 'userId')
-            return response
+            if (isPublic || isOwner) {
+              // If user has a username, redirect to the username-based URL
+              if (profileById.username) {
+                return NextResponse.redirect(new URL(`/profile/${profileById.username}`, request.url))
+              }
+              
+              // Otherwise just set the user ID in the request headers
+              response.headers.set('x-profile-id', profileById.id)
+              response.headers.set('x-profile-type', 'userId')
+              return response
+            } else {
+              // Profile is private and user is not the owner
+              return NextResponse.redirect(new URL('/not-found', request.url))
+            }
           }
         } catch (e) {
           console.error('Error in profile lookup middleware:', e)
@@ -107,13 +141,6 @@ export async function middleware(request: NextRequest) {
       // If we reach here, we couldn't find a valid profile
       // We'll continue to the profile page which can handle displaying a "not found" state
       return response
-    }
-
-    // If user is not authenticated and trying to access a protected route, redirect to login
-    if (!isAuthenticated && isProtectedRoute) {
-      const redirectUrl = new URL('/login', request.url)
-      redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
-      return NextResponse.redirect(redirectUrl)
     }
 
     // If user is authenticated and trying to access auth pages, redirect to dashboard
@@ -137,5 +164,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/login', '/signup', '/profile/:path*'],
+  matcher: ['/', '/dashboard/:path*', '/login', '/signup', '/profile/:path*', '/explore', '/explore/:path*'],
 }
