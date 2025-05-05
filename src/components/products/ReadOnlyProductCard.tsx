@@ -242,6 +242,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group relative">
       {/* Add share button to the top right of the card */}
       <button
+        type="button"
         onClick={handleShareClick}
         className="cursor-pointer absolute top-2 right-2 z-10 p-1.5 bg-white/80 hover:bg-white rounded-full shadow-md transition-all duration-200 transform hover:scale-110 focus:outline-none"
         aria-label="Поделиться"
@@ -261,6 +262,8 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
                   className={`w-full h-full object-cover transition-all duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
                     }`}
                   fill={true}
+                  quality={75}
+                  priority={false}
                   fallback={
                     <div className="w-full h-full flex items-center justify-center bg-gray-100 animate-pulse">
                       <p className="text-gray-500 text-xs sm:text-sm">Ошибка загрузки</p>
@@ -290,6 +293,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
 
               {isDescriptionLong && (
                 <button
+                  type="button"
                   onClick={() => setShowFullDescription(!showFullDescription)}
                   className="cursor-pointer text-xs text-[#3d82f7] hover:text-[#2d6ce0] mt-1 transition-all duration-200 hover:underline focus:outline-none"
                 >
@@ -300,6 +304,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
 
             <div className="flex justify-between items-center py-1 sm:py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
               <button
+                type="button"
                 onClick={handleTagClick}
                 className="cursor-pointer text-xs font-medium text-[#3d82f7] hover:text-[#2d6ce0] hover:underline focus:outline-none transition-all duration-200 transform hover:translate-x-1 flex items-center gap-1"
               >

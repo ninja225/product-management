@@ -220,6 +220,8 @@ export default function ProductCard({
                     className={`w-full h-full object-cover transition-all duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
                       }`}
                     fill={true}
+                    quality={75}
+                    priority={false}
                     fallback={
                       <div className="w-full h-full flex items-center justify-center bg-gray-100 animate-pulse">
                         <p className="text-gray-500 text-xs sm:text-sm">Ошибка загрузки</p>
@@ -280,6 +282,7 @@ export default function ProductCard({
             {isAuthor && (
               <div className="absolute top-2 right-2 z-10" ref={dropdownRef}>
                 <button
+                  type="button"
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer"
                   aria-label="Действия с интересом"
