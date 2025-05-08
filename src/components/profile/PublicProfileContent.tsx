@@ -315,26 +315,34 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
             {isOwner ? (
               <div className="pl-4 flex space-x-6 mb-4 md:mb-0">
                 <a
-                  href="/dashboard"
-                  className="text-[#3d82f7] hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+                  href={`/profile/${username || userId}`}
+                  className="text-gray-800 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative"
                 >
-                  Профиль
+                  <span className="flex items-center gap-2">
+                    Интересы
+                    <span className="text-sm px-1.5 py-0.5">
+                      {leftProducts.length + rightProducts.length}
+                    </span>
+                  </span>
+                  <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-100"></span>
                 </a>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative group"
                   onClick={(e) => {
                     e.preventDefault();
                     router.push('/404');
                   }}
                 >
-                  Активность
+                  <span>Посты</span>
+                  <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
                 </a>
                 <a
                   href="/dashboard/profile"
-                  className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative group"
                 >
-                  Настройки
+                  <span>био</span>
+                  <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
                 </a>
               </div>
             ) : (

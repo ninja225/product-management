@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [userId, setUserId] = useState<string | null>(null)
   const [userName, setUserName] = useState<string>('')
+  const [username, setUsername] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [leftProducts, setLeftProducts] = useState<Product[]>([])
@@ -37,14 +38,14 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
-        
-        // Get user profile details (name, avatar, cover image)
+
+        // Get user profile details (name, avatar, cover image, username)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, avatar_url, cover_image_url')
+          .select('full_name, avatar_url, cover_image_url, username')
           .eq('id', user.id)
           .single()
-        
+
         if (profile) {
           setUserName(profile.full_name || user.email?.split('@')[0] || 'Пользователь')
           if (profile.avatar_url) {
@@ -52,6 +53,10 @@ export default function DashboardPage() {
           }
           if (profile.cover_image_url) {
             setCoverImageUrl(profile.cover_image_url)
+          }
+          // Store username if available
+          if (profile.username) {
+            setUsername(profile.username)
           }
         } else {
           setUserName(user.email?.split('@')[0] || 'Пользователь')
@@ -94,14 +99,14 @@ export default function DashboardPage() {
       const normalizedFilter = tagFilter.toLowerCase().trim()
       // Check if the filter matches the default tag
       const isDefaultTagSearch = DEFAULT_TAG.toLowerCase().includes(normalizedFilter)
-      
-      setFilteredLeftProducts(leftProducts.filter(p => 
-        p.tag?.toLowerCase().includes(normalizedFilter) || 
+
+      setFilteredLeftProducts(leftProducts.filter(p =>
+        p.tag?.toLowerCase().includes(normalizedFilter) ||
         // Include products with null/empty tags if searching for default tag
         (isDefaultTagSearch && (!p.tag || p.tag.trim() === ''))
       ))
-      setFilteredRightProducts(rightProducts.filter(p => 
-        p.tag?.toLowerCase().includes(normalizedFilter) || 
+      setFilteredRightProducts(rightProducts.filter(p =>
+        p.tag?.toLowerCase().includes(normalizedFilter) ||
         // Include products with null/empty tags if searching for default tag
         (isDefaultTagSearch && (!p.tag || p.tag.trim() === ''))
       ))
@@ -171,6 +176,8 @@ export default function DashboardPage() {
     setTagFilter(tag);
   };
 
+  const totalInterests = leftProducts.length + rightProducts.length;
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -186,9 +193,9 @@ export default function DashboardPage() {
         {/* Cover image section */}
         <div className="rounded-lg relative w-full h-64 mb-8">
           {coverImageUrl ? (
-            <SupabaseImage 
-              src={coverImageUrl} 
-              alt="Profile Cover" 
+            <SupabaseImage
+              src={coverImageUrl}
+              alt="Profile Cover"
               className="w-full h-full object-cover rounded-lg"
               fallback={
                 <div className="rounded-lg w-full h-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
@@ -197,14 +204,14 @@ export default function DashboardPage() {
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg"></div>
           )}
-          
+
           {/* Centered avatar and username with text shadow */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="relative w-[130px] h-[130px] rounded-full overflow-hidden bg-white p-1 shadow-lg mb-4">
               {avatarUrl ? (
-                <SupabaseImage 
-                  src={avatarUrl} 
-                  alt="User Avatar" 
+                <SupabaseImage
+                  src={avatarUrl}
+                  alt="User Avatar"
                   className="w-full h-full rounded-full object-cover"
                   fallback={
                     <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-2xl font-bold rounded-full animate-pulse">
@@ -223,34 +230,42 @@ export default function DashboardPage() {
         </div>
 
         {/* Navigation and filter section - aligned with grid */}
-        <div className="bg-white shadow py-4 px-2 sticky top-0 z-10 rounded-lg">
+        <div className="bg-white shadow py-4 px-2 sticky top-0 z-10 rounded-b-lg">
           <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Left anchors */}
             <div className="pl-4 flex space-x-6 mb-4 md:mb-0">
-              <a 
-                href="/dashboard"
-                className="text-[#3d82f7] hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+              <a
+                href={`/profile/${username || userId}`}
+                className="text-gray-800 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative"
               >
-                Профиль
+                <span className="flex items-center gap-2">
+                  Интересы
+                  <span className="text-sm px-1.5 py-0.5">
+                    {totalInterests}
+                  </span>
+                </span>
+                <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-100"></span>
               </a>
-              <a 
+              <a
                 href="#"
-                className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+                className="text-gray-600 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative group"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push('/404');
                 }}
               >
-                Активность
+                <span>Посты</span>
+                <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
               </a>
-              <a 
-                href="/dashboard/profile"
-                className="text-gray-600 hover:text-[#2d6ce0] transition-colors duration-200 font-medium"
+              <a
+                href="#"
+                className="text-gray-600 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative group"
               >
-                Настройки
+                <span>био</span>
+                <span className="absolute -bottom-6 left-0 w-full h-1 bg-[#3d82f7] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
               </a>
             </div>
-            
+
             {/* Right filter */}
             <div className="w-full md:w-64">
               <div className="relative group">
@@ -281,7 +296,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Content container with grid sections */}
         <div className="mt-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative animate-fadeIn">
@@ -289,18 +304,18 @@ export default function DashboardPage() {
             <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
               {/* Rounded top border for "like" section */}
               <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
-              
+
               <div className="flex flex-wrap justify-between items-center mb-4 gap-2 pt-2">
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
                     Нравится
                   </h2>
-                  <Image 
-                    src="/assets/like.png" 
-                    width={32} 
-                    height={32} 
-                    alt="Like" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" 
+                  <Image
+                    src="/assets/like.png"
+                    width={32}
+                    height={32}
+                    alt="Like"
+                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
                   />
                 </div>
                 <button
@@ -359,18 +374,18 @@ export default function DashboardPage() {
             <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
               {/* Rounded top border for "dislike" section */}
               <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
-              
+
               <div className="flex flex-wrap justify-between items-center mb-4 gap-2 pt-2">
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
                     Не Нравится
                   </h2>
-                  <Image 
-                    src="/assets/dislike.png" 
-                    width={32} 
-                    height={32} 
-                    alt="Dislike" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" 
+                  <Image
+                    src="/assets/dislike.png"
+                    width={32}
+                    height={32}
+                    alt="Dislike"
+                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
                   />
                 </div>
                 <button
@@ -382,7 +397,7 @@ export default function DashboardPage() {
                   className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#f05d4d] rounded-md hover:bg-[#e04d3e] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
                 >
                   <PlusCircle size={16} />
-                  <span className="sm:hidden">Добавить</span>
+                  <span className="sm-hidden">Добавить</span>
                   <span className="hidden sm:inline">Добавить</span>
                 </button>
               </div>
