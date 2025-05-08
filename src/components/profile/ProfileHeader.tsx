@@ -135,7 +135,7 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
             <SupabaseImage
               src={coverImageUrl}
               alt="Profile Cover"
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-t-lg"
               priority={true}
               quality={85}
               fallback={
