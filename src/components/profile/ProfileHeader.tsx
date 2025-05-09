@@ -6,6 +6,8 @@ import SupabaseImage from '@/components/ui/SupabaseImage'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Search } from 'lucide-react'
+import FollowButton from './FollowButton'
+import FollowStats from './FollowStats'
 
 interface ProfileHeaderProps {
   userId: string
@@ -144,9 +146,7 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-[#3d82f7] to-purple-600 rounded-lg"></div>
-          )}
-
-          {/* Centered avatar and username with text shadow */}
+          )}          {/* Centered avatar and username with text shadow */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="relative w-[130px] h-[130px] rounded-full overflow-hidden bg-white p-1 shadow-lg mb-4">
               {avatarUrl ? (
@@ -169,9 +169,10 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
               )}
             </div>
             <h2 className="font-medium text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">{userName}</h2>
+            <FollowStats userId={userId} className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,1)] mt-1" />
+            {!isOwner && <FollowButton targetUserId={userId} className="mt-2" />}
           </div>
         </div>
-
         {/* Navigation and filter section - aligned with grid */}
         <div className="bg-white shadow py-4 px-4 sticky top-16 z-10 rounded-b-lg mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
@@ -242,8 +243,7 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
                     className={`text-gray-600 hover:text-[#3d82f7] transition-colors duration-200 font-medium relative group ${isBioPage ? 'text-gray-800' : ''}`}
                   >
                     <span>Био</span>
-                    <span className={`absolute -bottom-4 left-0 w-full h-1 bg-[#3d82f7] transform ${isBioPage ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'} transition-transform duration-200`}></span>
-                  </Link>
+                    <span className={`absolute -bottom-4 left-0 w-full h-1 bg-[#3d82f7] transform ${isBioPage ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'} transition-transform duration-200`}></span>                  </Link>
                 </>
               )}
             </div>

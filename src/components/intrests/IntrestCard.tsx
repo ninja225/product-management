@@ -35,6 +35,7 @@ export default function ProductCard({
   const [isAuthor, setIsAuthor] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [isHighlighted, setIsHighlighted] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -68,6 +69,37 @@ export default function ProductCard({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [product.image_url, product.user_id, supabase]);
+  // Check if this product should be highlighted based on URL fragment
+  useEffect(() => {
+    // Check if the URL fragment targets this product
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash
+      const productFragment = `#intrests-${product.id}`
+
+      if (hash === productFragment) {
+        setIsHighlighted(true)
+
+        // Scroll into view with a little delay to ensure DOM is ready
+        const element = document.getElementById(`intrests-${product.id}`)
+        if (element) {
+          console.log('Found element for scrolling:', element);
+          setTimeout(() => {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            })
+          }, 300) // Increase delay slightly
+        }
+
+        // Remove highlight after 4 seconds
+        const timer = setTimeout(() => {
+          setIsHighlighted(false)
+        }, 4000)
+
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [product.id]);
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -199,14 +231,16 @@ export default function ProductCard({
       onTagClick(product.tag || DEFAULT_TAG);
     }
   };
-
   const description = product.description || 'Нет описания'
   const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group">
+    <div
+      id={`intrests-${product.id}`}
+      className={`bg-white rounded-lg shadow-md overflow-hidden border ${isHighlighted ? 'border-blue-500 ring-4 ring-blue-500' : 'border-gray-200 hover:border-indigo-200'} transition-all duration-300 hover:shadow-xl group`}
+    >
       {/* Restructured layout - image now at the top left */}
-      <div className="flex flex-col">
+      <div className={`flex flex-col ${isHighlighted ? 'bg-blue-50' : ''}`}>
         {/* Top section with image and title */}
         <div className="flex">
           {/* Left side - Image - fixed position at top left */}

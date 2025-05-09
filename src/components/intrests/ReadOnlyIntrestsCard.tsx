@@ -23,6 +23,7 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
   const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [isHighlighted, setIsHighlighted] = useState(false)
 
   const supabase = createClient()
 
@@ -33,6 +34,42 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
       img.onload = () => setIsImageLoaded(true);
     }
   }, [product.image_url]);
+
+  // Check if this product should be highlighted based on URL fragment
+  useEffect(() => {
+    // Check if the URL fragment targets this product
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash
+      const productFragment = `#intrests-${product.id}`
+
+      if (hash === productFragment) {
+        console.log('Highlighting read-only product:', product.id, 'Hash:', hash);
+        // Apply highlight effect
+        setIsHighlighted(true)
+
+        // Scroll into view with a slightly longer delay
+        const element = document.getElementById(`intrests-${product.id}`)
+        if (element) {
+          console.log('Found element for scrolling:', element);
+          setTimeout(() => {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            })
+          }, 300)
+        } else {
+          console.log('Element not found for ID:', `product-${product.id}`);
+        }
+
+        // Remove highlight after 4 seconds
+        const timer = setTimeout(() => {
+          setIsHighlighted(false)
+        }, 4000)
+
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [product.id]);
 
   const getDisplayTag = () => {
     const tag = product.tag || DEFAULT_TAG;
@@ -235,11 +272,13 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
     }
   };
 
-  const description = product.description || 'Нет описания'
-  const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH
-
+  const description = product.description || 'Нет описания';
+  const isDescriptionLong = description.length > MAX_DESCRIPTION_LENGTH;
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 group relative">
+    <div
+      id={`intrests-${product.id}`}
+      className={`bg-white rounded-lg shadow-md overflow-hidden border ${isHighlighted ? 'border-blue-500 ring-4 ring-blue-500' : 'border-gray-200 hover:border-indigo-200'} transition-all duration-300 hover:shadow-xl group relative`}
+    >
       {/* Add share button to the top right of the card */}
       <button
         type="button"
@@ -248,10 +287,9 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
         aria-label="Поделиться"
         title="Поделиться интересом"
       >
-        <Share size={16} className="text-[#3d82f7]" />
-      </button>
+        <Share size={16} className="text-[#3d82f7]" />      </button>
 
-      <div className="flex flex-col">
+      <div className={`flex flex-col ${isHighlighted ? 'bg-blue-50' : ''}`}>
         <div className="flex">
           <div className="flex items-start justify-center w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] flex-shrink-0 p-2">
             <div className="relative w-full h-full border border-gray-200 rounded-md overflow-hidden bg-white group-hover:border-indigo-200 transition-colors duration-300">

@@ -8,7 +8,7 @@ import SupabaseImage from '../ui/SupabaseImage'
 import ProductSuggestionBox, { SuggestionProductData } from '../suggestions/ProductSuggestionBox'
 import TagSuggestionBox, { SuggestionTagData } from '../suggestions/TagSuggestionBox'
 import { Save, X, AlertCircle, Loader2, RefreshCw, Lock, Info, Hash, Trash2 } from 'lucide-react'
-import { DEFAULT_TAG } from './ProductCard'
+import { DEFAULT_TAG } from './IntrestCard'
 import { toast } from 'react-hot-toast'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
 
@@ -39,30 +39,30 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     tag: false,
     image: false
   })
-  
+
   // States for product deletion functionality
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [duplicateProduct, setDuplicateProduct] = useState<Product | null>(null)
-  
+
   // Refs for input elements to control focus
   const titleInputRef = useRef<HTMLInputElement>(null)
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null)
-  
+
   const supabase = createClient()
   const isEditing = !!product
-  
+
   useEffect(() => {
     if (product) {
       setTitle(product.title || '')
       setDescription(product.description || '')
-      
+
       // Handle tag with or without hash symbol
       if (product.tag) {
         setTag(product.tag)
         setTagWithoutHash(product.tag.startsWith('#') ? product.tag.substring(1) : product.tag)
       }
-      
+
       if (product.image_url) {
         setImagePreview(product.image_url)
       }
@@ -73,26 +73,26 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!lockedFields.tag) {
       const value = e.target.value
-      
+
       // Remove # symbol and commas if user types them
       const cleanTag = value.startsWith('#') ? value.substring(1) : value
       const tagWithoutCommas = cleanTag.replace(/,/g, '')
-      
+
       setTagWithoutHash(tagWithoutCommas)
-      
+
       // Store the tag value - we'll add the # only during submission
       // Don't add # here to prevent duplicates
       setTag(tagWithoutCommas)
     }
   }
-  
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       // Only allow image changes if fields are not locked
       if (!lockedFields.image) {
         setImage(file)
-        
+
         // Create preview
         const reader = new FileReader()
         reader.onload = () => {
@@ -106,17 +106,17 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setTitle(newTitle)
-    
+
     // If title changes at all, clear the fields since we need an exact match
     if (productFromDb) {
       resetAutofilledData()
     }
   }
-  
+
   const resetAutofilledData = () => {
     // Don't clear fields when editing an existing product
     if (isEditing) return
-    
+
     // Only reset fields that were autofilled from database
     if (productFromDb) {
       // Clear description only if it matches the database value
@@ -133,23 +133,23 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         setTag('')
         setTagWithoutHash('')
       }
-      
+
       // Unlock fields
       setLockedFields({
         tag: false,
         image: false
       })
-      
+
       // Clear the database product reference
       setProductFromDb(null)
     }
   }
-  
+
   // Check if product exists in the other display section
   const checkProductExistsInOtherSection = async (productTitle: string): Promise<{ exists: boolean, product?: Product }> => {
     // Determine which section to check
     const otherSection = section === 'left' ? 'right' : 'left'
-    
+
     try {
       const { data, error } = await supabase
         .from('products')
@@ -158,13 +158,13 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         .eq('display_section', otherSection)
         .ilike('title', productTitle.trim())
         .limit(1)
-        
+
       if (error) {
         throw error
       }
-      
+
       // If we found a product with the same title in the other section
-      return { 
+      return {
         exists: data && data.length > 0,
         product: data && data.length > 0 ? data[0] : undefined
       }
@@ -174,14 +174,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       return { exists: false }
     }
   }
-  
+
   // Change the function to return the product data instead of just a boolean
   const checkProductExistsInSameSection = async (productTitle: string): Promise<{ exists: boolean, product?: Product }> => {
     // Skip check when editing an existing product with the same title
     if (isEditing && product?.title?.trim().toLowerCase() === productTitle.trim().toLowerCase()) {
       return { exists: false };
     }
-    
+
     try {
       const { data, error } = await supabase
         .from('products')
@@ -190,12 +190,12 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         .eq('display_section', section)
         .ilike('title', productTitle.trim()) // Case insensitive match
         .limit(1)
-        
+
       if (error) {
         throw error
       }
-      
-      return { 
+
+      return {
         exists: data && data.length > 0,
         product: data && data.length > 0 ? data[0] : undefined
       };
@@ -208,7 +208,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
 
   const handleMatchFound = (suggestionData: SuggestionProductData | null, isSearching: boolean) => {
     setIsSearchingSuggestions(isSearching)
-    
+
     if (!isSearching) {
       // Clear any previous match if no suggestion data returned
       if (!suggestionData) {
@@ -217,32 +217,32 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         }
         return
       }
-      
+
       // If we have a suggestion and we're not in editing mode, autofill
       if (suggestionData && !isEditing) {
         // Store the database product for reference
         setProductFromDb(suggestionData)
-        
+
         // IMPORTANT: Set the title field to use the original capitalization from database
         if (suggestionData.title) {
           setTitle(suggestionData.title)
         }
-        
+
         // Auto-fill the fields
         if (suggestionData.description) {
           setDescription(suggestionData.description)
         }
-        
+
         if (suggestionData.tag) {
           setTag(suggestionData.tag)
           // Handle tag with or without hash for display
           setTagWithoutHash(suggestionData.tag.startsWith('#') ? suggestionData.tag.substring(1) : suggestionData.tag)
         }
-        
+
         if (suggestionData.image_url) {
           setImagePreview(suggestionData.image_url)
         }
-        
+
         // If this suggestion is from the database, lock fields
         if (suggestionData.isFromDatabase) {
           setLockedFields({
@@ -261,11 +261,11 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
     // Dismiss any active toasts when showing the confirmation dialog
     toast.dismiss()
   }
-  
+
   // Handle confirming product deletion
   const handleDeleteConfirm = async () => {
     if (!duplicateProduct) return
-    
+
     setIsDeleting(true)
     try {
       // Delete the product image if it exists
@@ -282,18 +282,18 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           }
         }
       }
-      
+
       // Delete the product from the database
       const { error: deleteError } = await supabase
         .from('products')
         .delete()
         .eq('id', duplicateProduct.id)
-      
+
       if (deleteError) throw deleteError
-      
+
       // Show success notification
       toast.success('Интерес успешно удален')
-      
+
       // Refresh form to continue adding the new product
       setIsLoading(false)
     } catch (error) {
@@ -309,32 +309,32 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!title.trim()) {
       setError('Пожалуйста, введите название интереса')
       return
     }
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       // Variable to store the final title (original or corrected)
       let finalTitle = title.trim();
-      
+
       // Skip duplicate check when editing existing product
       if (!isEditing) {
         // First check if the product exists in the same display section
         const { exists, product: existingProduct } = await checkProductExistsInSameSection(title);
-        
+
         if (exists && existingProduct) {
           // Make sure existingProduct.title is not null before comparing
-          if (existingProduct.title && 
-              existingProduct.title.toLowerCase() === title.trim().toLowerCase() && 
-              existingProduct.title !== title.trim()) {
+          if (existingProduct.title &&
+            existingProduct.title.toLowerCase() === title.trim().toLowerCase() &&
+            existingProduct.title !== title.trim()) {
             // Use the original capitalization for consistency
             finalTitle = existingProduct.title;
-            
+
             // Show a toast notification that we're using the proper capitalization
             toast.success(
               `Используется оригинальное написание "${existingProduct.title}"`,
@@ -369,18 +369,17 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           setIsLoading(false);
           return;
         }
-        
+
         // Then check if the same product exists in the other display section
         const { exists: existsInOther, product: duplicated } = await checkProductExistsInOtherSection(title);
         if (existsInOther && duplicated) {
           const otherSectionName = section === 'left' ? 'правом' : 'левом';
-          
+
           // Create a custom toast with a delete button
           toast.custom((t) => (
-            <div 
-              className={`${
-                t.visible ? 'animate-enter' : 'animate-leave'
-              } max-w-md w-full bg-red-50 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            <div
+              className={`${t.visible ? 'animate-enter' : 'animate-leave'
+                } max-w-md w-full bg-red-50 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
             >
               <div className="flex-1 w-0 p-4">
                 <div className="flex items-start">
@@ -410,33 +409,33 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
                 </button>
               </div>
             </div>
-          ), { 
-            duration: 5000, 
+          ), {
+            duration: 5000,
             position: 'top-center',
           });
-          
+
           setIsLoading(false);
           return;
         }
       }
 
       let imageUrl = product?.image_url || null;
-      
+
       if (image) {
         const fileExt = image.name.split('.').pop()
         const fileName = `${userId}/${uuidv4()}.${fileExt}`
-        
+
         const { error: uploadError } = await supabase.storage
           .from('product_images')
           .upload(fileName, image)
-          
+
         if (uploadError) {
           throw new Error(`Error uploading image: ${uploadError.message}`)
         }
-        
+
         const { data } = supabase.storage.from('product_images').getPublicUrl(fileName)
         imageUrl = data.publicUrl
-        
+
         // Delete old image if updating
         if (isEditing && product?.image_url) {
           const oldImagePath = product.image_url.split('/').pop()
@@ -452,7 +451,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       } else if (imagePreview && imagePreview !== product?.image_url) {
         imageUrl = imagePreview
       }
-      
+
       // Handle the tag properly to ensure exactly one # symbol
       let finalTag = '';
       if (tagWithoutHash && tagWithoutHash.trim()) {
@@ -463,7 +462,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       } else {
         finalTag = DEFAULT_TAG;
       }
-      
+
       // Update productData to use the potentially corrected title (finalTitle)
       const productData: ProductInsert = {
         user_id: userId,
@@ -473,22 +472,22 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         image_url: imageUrl,
         display_section: section
       }
-      
+
       if (isEditing && product?.id) {
         const { error: updateError } = await supabase
           .from('products')
           .update(productData)
           .eq('id', product.id)
-          
+
         if (updateError) throw new Error(`Error updating product: ${updateError.message}`)
       } else {
         const { error: insertError } = await supabase
           .from('products')
           .insert(productData)
-          
+
         if (insertError) throw new Error(`Error creating product: ${insertError.message}`)
       }
-      
+
       onComplete()
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
@@ -498,7 +497,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       setIsLoading(false)
     }
   }
-  
+
   // Handle tag suggestions found
   const handleTagSuggestionsFound = (suggestions: SuggestionTagData[] | null, isSearching: boolean) => {
     setIsSearchingTagSuggestions(isSearching)
@@ -517,14 +516,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       <h2 className="text-xl font-semibold mb-4 text-black">
         {isEditing ? 'Изменить интерес' : 'Добавить новый интерес'}
       </h2>
-      
+
       {error && (
         <div className="p-3 mb-4 text-sm text-red-600 bg-red-100 rounded-md flex items-center gap-2">
           <AlertCircle size={16} />
           <span>{error}</span>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         {/* Title section */}
         <div className="mb-4 relative">
@@ -539,7 +538,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               </span>
             )}
           </div>
-          
+
           <div className="relative">
             <input
               id="title"
@@ -549,36 +548,34 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               required
               ref={titleInputRef}
               placeholder="Введите названия интереса"
-              className={`w-full text-black px-3 py-2 border ${
-                productFromDb ? 'border-indigo-300' : 'border-gray-300'
-              } rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7] ${
-                isSearchingSuggestions ? 'bg-gray-50' : ''
-              }`}
+              className={`w-full text-black px-3 py-2 border ${productFromDb ? 'border-indigo-300' : 'border-gray-300'
+                } rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7] ${isSearchingSuggestions ? 'bg-gray-50' : ''
+                }`}
             />
-            
+
             {isSearchingSuggestions && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <Loader2 size={16} className="text-gray-400 animate-spin" />
               </div>
             )}
           </div>
-          
+
           {productFromDb && (
             <div className="mt-1 text-xs text-[#3d82f7]  flex items-center gap-1">
               <Info size={12} />
               <span>автоматически заполнена</span>
             </div>
           )}
-          
+
           {!isEditing && (
-            <ProductSuggestionBox 
-              inputValue={title} 
+            <ProductSuggestionBox
+              inputValue={title}
               onFindMatch={handleMatchFound}
               excludeUserId={userId}
             />
           )}
         </div>
-        
+
         {/* Description section */}
         <div className="mb-4">
           <label htmlFor="description" className="block text-sm font-medium text-black mb-1">
@@ -596,7 +593,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             placeholder="Опишите ваш интерес"
           />
         </div>
-        
+
         {/* Tag section */}
         <div className="mb-6">
           <label htmlFor="tag" className="block text-sm font-medium text-black mb-1 flex items-center gap-2">
@@ -621,11 +618,9 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               value={tagWithoutHash}
               onChange={handleTagChange}
               disabled={lockedFields.tag}
-              className={`w-full text-black pl-8 pr-3 py-2 border ${
-                lockedFields.tag ? 'bg-gray-50 border-indigo-200 cursor-not-allowed' : 'border-gray-300'
-              } rounded-md shadow-sm focus:outline-none ${
-                !lockedFields.tag ? 'focus:ring-[#3d82f7] focus:border-[#3d82f7]' : ''
-              } ${isSearchingTagSuggestions ? 'bg-gray-50' : ''}`}
+              className={`w-full text-black pl-8 pr-3 py-2 border ${lockedFields.tag ? 'bg-gray-50 border-indigo-200 cursor-not-allowed' : 'border-gray-300'
+                } rounded-md shadow-sm focus:outline-none ${!lockedFields.tag ? 'focus:ring-[#3d82f7] focus:border-[#3d82f7]' : ''
+                } ${isSearchingTagSuggestions ? 'bg-gray-50' : ''}`}
               placeholder="Добавить тег (без символа #)"
             />
             {isSearchingTagSuggestions && (
@@ -640,7 +635,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
                 <Info size={12} />
                 <span>Символ # добавляется автоматически</span>
               </p>
-              <TagSuggestionBox 
+              <TagSuggestionBox
                 inputValue={tagWithoutHash}
                 onSelectTag={handleTagSelect}
                 onFindMatches={handleTagSuggestionsFound}
@@ -653,7 +648,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             </p>
           )}
         </div>
-        
+
         {/* Image section */}
         <div className="mb-4 relative">
           <label htmlFor="product-image" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
@@ -663,9 +658,8 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             )}
           </label>
           {imagePreview && (
-            <div className={`relative h-48 mb-2 border rounded-md overflow-hidden ${
-              lockedFields.image ? 'border-indigo-200' : 'border-gray-300'
-            }`}>
+            <div className={`relative h-48 mb-2 border rounded-md overflow-hidden ${lockedFields.image ? 'border-indigo-200' : 'border-gray-300'
+              }`}>
               <SupabaseImage
                 src={imagePreview}
                 alt="Product preview"
@@ -693,11 +687,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             onChange={handleImageChange}
             disabled={lockedFields.image}
             aria-label="Выберите изображение Интереса"
-            className={`w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${
-              lockedFields.image 
-              ? 'file:bg-gray-100 file:text-gray-400 cursor-not-allowed opacity-75' 
+            className={`w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${lockedFields.image
+              ? 'file:bg-gray-100 file:text-gray-400 cursor-not-allowed opacity-75'
               : 'file:bg-indigo-50 file:text-[#3d82f7] hover:file:bg-indigo-100 cursor-pointer'
-            }`}
+              }`}
           />
           {lockedFields.image && (
             <p className="mt-1 text-xs text-gray-500">
@@ -705,7 +698,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             </p>
           )}
         </div>
-        
+
         {/* Button section */}
         <div className="flex justify-end space-x-3">
           <button
@@ -735,7 +728,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           </button>
         </div>
       </form>
-      
+
       {/* Confirmation Dialog for Deletion */}
       {showDeleteConfirm && duplicateProduct && (
         <ConfirmationDialog

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase'
-import ReadOnlyProductCard from '@/components/products/ReadOnlyProductCard'
-import ProductCard, { DEFAULT_TAG } from '@/components/products/ProductCard'
-import ProductForm from '@/components/products/ProductForm'
+import ReadOnlyProductCard from '@/components/intrests/ReadOnlyIntrestsCard'
+import ProductCard, { DEFAULT_TAG } from '@/components/intrests/IntrestCard'
+import ProductForm from '@/components/intrests/IntrestsForm'
 import { PlusCircle } from 'lucide-react'
 import Image from 'next/image'
 import ProfileHeader from './ProfileHeader'
@@ -369,7 +369,7 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                   className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#f05d4d] rounded-md hover:bg-[#e04d3e] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
                 >
                   <PlusCircle size={16} />
-                  <span className="sm-hidden">Добавить</span>
+                  <span className="sm:hidden">Добавить</span>
                   <span className="hidden sm:inline">Добавить</span>
                 </button>
               )}
