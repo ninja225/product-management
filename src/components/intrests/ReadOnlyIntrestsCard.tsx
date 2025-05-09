@@ -75,12 +75,14 @@ export default function ReadOnlyProductCard({ product, onTagClick }: ReadOnlyPro
     const tag = product.tag || DEFAULT_TAG;
     return tag.startsWith('#') ? tag.substring(1) : tag;
   }
-
   const handleTagClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onTagClick) {
-      onTagClick(product.tag || DEFAULT_TAG);
+      // Ensure we pass the tag without a # prefix
+      const tag = product.tag || DEFAULT_TAG;
+      const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag;
+      onTagClick(cleanTag);
     }
   };
 

@@ -222,13 +222,14 @@ export default function ProductCard({
     // If tag already starts with #, don't add another one
     return tag.startsWith('#') ? tag.substring(1) : tag;
   }
-
   const handleTagClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onTagClick) {
-      // Always pass the original tag to the handler
-      onTagClick(product.tag || DEFAULT_TAG);
+      // Make sure we pass the tag without the # prefix
+      const tag = product.tag || DEFAULT_TAG;
+      const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag;
+      onTagClick(cleanTag);
     }
   };
   const description = product.description || 'Нет описания'

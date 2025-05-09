@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/utils/supabase'
 import ReadOnlyProductCard from '@/components/intrests/ReadOnlyIntrestsCard'
 import ProductCard, { DEFAULT_TAG } from '@/components/intrests/IntrestCard'
@@ -8,6 +8,7 @@ import ProductForm from '@/components/intrests/IntrestsForm'
 import { PlusCircle } from 'lucide-react'
 import Image from 'next/image'
 import ProfileHeader from './ProfileHeader'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 interface Product {
   id: string
@@ -33,6 +34,10 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
   const [isLoading, setIsLoading] = useState(true)
   const [profileNotFound, setProfileNotFound] = useState(false)
   const supabase = createClient()
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [, startTransition] = useTransition()
 
   // Dashboard mode state variables
   const [isOwner, setIsOwner] = useState(false)
@@ -152,16 +157,39 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
 
     setFilteredLeftProducts(filteredLeft);
     setFilteredRightProducts(filteredRight);
-  }, [tagFilter, leftProducts, rightProducts, isOwner]);
-
-  // Handler for tag click
+  }, [tagFilter, leftProducts, rightProducts, isOwner]);  // Handler for tag click
   const handleTagClick = (tag: string) => {
-    if (tag === tagFilter) {
-      // If clicking the same tag, remove the filter
-      setTagFilter('');
-    } else {
-      // Otherwise set the new filter
-      setTagFilter(tag);
+    // Ensure we're working with a clean tag (no # prefix)
+    const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag;
+
+    try {
+      // Update local state and URL
+      if (cleanTag === tagFilter) {
+        // If clicking the same tag, remove the filter
+        setTagFilter('');
+        // Update URL - remove tag parameter
+        startTransition(() => {
+          const nextParams = new URLSearchParams(Array.from(searchParams.entries()));
+          nextParams.delete('tag');
+          // Push new URL (shallow, no reload, shareable)
+          router.push(`${pathname}${nextParams.size ? `?${nextParams}` : ''}`);
+        });
+      } else {
+        // Otherwise set the new filter
+        setTagFilter(cleanTag);
+        // Update URL with tag parameter
+        startTransition(() => {
+          const nextParams = new URLSearchParams(Array.from(searchParams.entries()));
+          nextParams.set('tag', cleanTag);
+          // Push new URL (shallow, no reload, shareable)
+          router.push(`${pathname}${nextParams.size ? `?${nextParams}` : ''}`);
+        });
+      }
+    } catch (err) {
+      // Log error with context as per guideline
+      console.error('Failed to update tag filter in URL', { value: cleanTag, err });
+      // Still update the local state even if URL update fails
+      setTagFilter(cleanTag === tagFilter ? '' : cleanTag);
     }
   };
 

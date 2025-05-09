@@ -1,10 +1,11 @@
+
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/utils/supabase'
 import SupabaseImage from '@/components/ui/SupabaseImage'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
 import FollowButton from './FollowButton'
 import FollowStats from './FollowStats'
@@ -25,19 +26,51 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
   const [totalInterests, setTotalInterests] = useState(0)
   const [totalPosts, setTotalPosts] = useState(0)
   const [localTagFilter, setLocalTagFilter] = useState(tagFilter)
-  const pathname = usePathname()
-  const supabase = createClient()
 
-  // Update local tag filter when prop changes
+  // Add for router navigation
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const supabase = createClient()
+  const [, startTransition] = useTransition();
+
+  // Ensure the local state tracks the prop
   useEffect(() => {
     setLocalTagFilter(tagFilter)
   }, [tagFilter])
 
-  // Handle tag filter change
+  // When the URL changes, notify parent (if needed)
+  useEffect(() => {
+    const tagFromSearch = searchParams.get('tag') || ''
+    setLocalTagFilter(tagFromSearch)
+    if (onTagFilterChange) {
+      onTagFilterChange(tagFromSearch)
+    }
+    // Only run on search param changes (not just mount)
+  }, [searchParams, onTagFilterChange])
+
+  // Handle tag filter change - updates URL in place!
   const handleTagFilterChange = (value: string) => {
     setLocalTagFilter(value)
+    // If parent wants to know instantly, notify
     if (onTagFilterChange) {
       onTagFilterChange(value)
+    }
+    // Update the URL query params using the router
+    try {
+      startTransition(() => {
+        const nextParams = new URLSearchParams(Array.from(searchParams.entries()))
+        if (value) {
+          nextParams.set('tag', value)
+        } else {
+          nextParams.delete('tag')
+        }
+        // Push new URL (shallow, no reload, shareable)
+        router.push(`${pathname}${nextParams.size ? `?${nextParams}` : ''}`)
+      })
+    } catch (err) {
+      // Log error with context as per guideline
+      console.error('Failed to update tag filter in URL', { value, err })
     }
   }
 
