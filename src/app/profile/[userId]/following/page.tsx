@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase'
 import Link from 'next/link'
 import SupabaseImage from '@/components/ui/SupabaseImage'
 import FollowButton from '@/components/profile/FollowButton'
+import { UserPlus } from 'lucide-react'
 
 interface Profile {
     id: string
@@ -53,14 +54,14 @@ export default function FollowingPage() {
                 const { data: followingData, error } = await supabase
                     .from('follows')
                     .select(`
-            following_id,
-            following:profiles!follows_following_id_fkey(
-              id,
-              full_name,
-              username,
-              avatar_url
-            )
-          `)
+                        following_id,
+                        following:profiles!following_id(
+                            id,
+                            full_name,
+                            username,
+                            avatar_url
+                        )
+                    `)
                     .eq('follower_id', actualUserId)
                     .order('created_at', { ascending: false })
 
@@ -68,20 +69,20 @@ export default function FollowingPage() {
 
                 if (followingData && Array.isArray(followingData)) {
                     const profiles = followingData.map((item: FollowingData) => {
-                        // Take the first following object if array is not empty
-                        const followingUser = Array.isArray(item.following) && item.following.length > 0
-                            ? item.following[0]
-                            : { id: '', full_name: '', username: '', avatar_url: '' };
+                        // Match notification pattern for data handling
+                        const followingUser = Array.isArray(item.following)
+                            ? (item.following[0] || { id: '', full_name: null, username: null, avatar_url: null })
+                            : (item.following || { id: '', full_name: null, username: null, avatar_url: null })
 
                         return {
                             id: followingUser.id ?? '',
                             full_name: followingUser.full_name ?? '',
                             username: followingUser.username ?? '',
                             avatar_url: followingUser.avatar_url ?? ''
-                        };
-                    });
+                        }
+                    })
 
-                    setFollowing(profiles);
+                    setFollowing(profiles)
                 }
             } catch (error) {
                 console.error('Error fetching following:', error)
@@ -96,7 +97,10 @@ export default function FollowingPage() {
     if (isLoading) {
         return (
             <div className="w-full max-w-2xl mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-6">Подписки</h1>
+                <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <UserPlus className="w-6 h-6 text-gray-700" />
+                    Подписки
+                </h1>
                 <div className="space-y-4">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-center p-4 border rounded-lg animate-pulse">
@@ -114,7 +118,10 @@ export default function FollowingPage() {
 
     return (
         <div className="w-full max-w-2xl mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-6">Подписки</h1>
+            <h1 className="text-gray-800 text-2xl font-bold mb-6 flex items-center gap-2">
+                <UserPlus className="w-6 h-6 text-gray-700" />
+                Подписки
+            </h1>
 
             {following.length === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
@@ -125,24 +132,29 @@ export default function FollowingPage() {
                     {following.map(profile => (
                         <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                             <Link href={`/profile/${profile.username || profile.id}`} className="flex items-center flex-1">
-                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 mr-4">                                    {profile.avatar_url ? (
-                                    <SupabaseImage
-                                        src={profile.avatar_url}
-                                        alt={profile.full_name || 'Пользователь'}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-lg font-bold">
-                                        {(profile.full_name?.[0] || 'П').toUpperCase()}
-                                    </div>
-                                )}
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 mr-4">
+                                    {profile.avatar_url ? (
+                                        <SupabaseImage
+                                            src={profile.avatar_url}
+                                            alt={profile.full_name || 'Пользователь'}
+                                            className="w-full h-full object-cover"
+                                            fallback={
+                                                <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-lg font-bold">
+                                                    {(profile.full_name?.[0] || profile.username?.[0] || 'П').toUpperCase()}
+                                                </div>
+                                            }
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-lg font-bold">
+                                            {(profile.full_name?.[0] || profile.username?.[0] || 'П').toUpperCase()}
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <p className="font-medium text-gray-900">{profile.full_name || 'Пользователь'}</p>
                                     {profile.username && <p className="text-sm text-gray-500">@{profile.username}</p>}
                                 </div>
                             </Link>
-
                             <FollowButton targetUserId={profile.id} />
                         </div>
                     ))}

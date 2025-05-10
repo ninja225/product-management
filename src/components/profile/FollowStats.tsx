@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase'
 import { UserPlus, Users } from 'lucide-react'
+import Link from 'next/link'
 
 interface FollowStatsProps {
     userId: string
     className?: string
+    username?: string
 }
 
 interface FollowCounts {
@@ -14,10 +16,13 @@ interface FollowCounts {
     following: number
 }
 
-export default function FollowStats({ userId, className = '' }: FollowStatsProps) {
+export default function FollowStats({ userId, username, className = '' }: FollowStatsProps) {
     const [counts, setCounts] = useState<FollowCounts>({ followers: 0, following: 0 })
     const [isLoading, setIsLoading] = useState(true)
     const supabase = createClient()
+
+    // Create the base path for profile links
+    const baseProfilePath = username ? `/profile/${username}` : `/profile/${userId}`
 
     useEffect(() => {
         const fetchFollowCounts = async () => {
@@ -61,20 +66,18 @@ export default function FollowStats({ userId, className = '' }: FollowStatsProps
                 <div className="animate-pulse h-5 w-16 bg-gray-200/50 rounded"></div>
             </div>
         )
-    }
-
-    return (
+    } return (
         <div className={`flex gap-6 text-sm font-medium ${className}`}>
-            <div className="flex items-center gap-1">
+            <Link href={`${baseProfilePath}/followers`} className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                 <Users size={14} />
                 <span className="font-bold">{counts.followers}</span>
                 <span>{counts.followers === 1 ? 'Подписчик' : 'Подписчики'}</span>
-            </div>
-            <div className="flex items-center gap-1">
+            </Link>
+            <Link href={`${baseProfilePath}/following`} className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                 <UserPlus size={14} />
                 <span className="font-bold">{counts.following}</span>
                 <span>Подписки</span>
-            </div>
+            </Link>
         </div>
     )
 }

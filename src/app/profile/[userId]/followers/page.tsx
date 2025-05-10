@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -7,6 +6,7 @@ import { createClient } from '@/utils/supabase'
 import Link from 'next/link'
 import SupabaseImage from '@/components/ui/SupabaseImage'
 import FollowButton from '@/components/profile/FollowButton'
+import { Users } from 'lucide-react'
 
 interface Profile {
     id: string
@@ -56,7 +56,7 @@ export default function FollowersPage() {
                     .from('follows')
                     .select(`
                         follower_id,
-                        follower:profiles!follows_follower_id_fkey(
+                        follower:profiles!follower_id(
                             id,
                             full_name,
                             username,
@@ -70,10 +70,10 @@ export default function FollowersPage() {
 
                 if (followersData && Array.isArray(followersData)) {
                     const profiles = followersData.map((item: FollowerJoinResult) => {
-                        // Take the first follower object if array is not empty
-                        const followerUser = Array.isArray(item.follower) && item.follower.length > 0
-                            ? item.follower[0]
-                            : { id: '', full_name: '', username: '', avatar_url: '' }
+                        // Match notification pattern for data handling
+                        const followerUser = Array.isArray(item.follower)
+                            ? (item.follower[0] || { id: '', full_name: null, username: null, avatar_url: null })
+                            : (item.follower || { id: '', full_name: null, username: null, avatar_url: null })
 
                         return {
                             id: followerUser.id ?? '',
@@ -98,7 +98,10 @@ export default function FollowersPage() {
     if (isLoading) {
         return (
             <div className="w-full max-w-2xl mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-6">Подписчики</h1>
+                <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Users className="w-6 h-6 text-gray-700" />
+                    Подписчики
+                </h1>
                 <div className="space-y-4">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-center p-4 border rounded-lg animate-pulse">
@@ -116,7 +119,10 @@ export default function FollowersPage() {
 
     return (
         <div className="w-full max-w-2xl mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-6">Подписчики</h1>
+            <h1 className="text-gray-800 text-2xl font-bold mb-6 flex items-center gap-2">
+                <Users className="w-6 h-6 text-gray-700" />
+                Подписчики
+            </h1>
 
             {followers.length === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
@@ -128,14 +134,20 @@ export default function FollowersPage() {
                         <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                             <Link href={`/profile/${profile.username || profile.id}`} className="flex items-center flex-1">
                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 mr-4">
-                                    {profile.avatar_url ? (<SupabaseImage
-                                        src={profile.avatar_url}
-                                        alt={profile.full_name || 'Пользователь'}
-                                        className="w-full h-full object-cover"
-                                    />
+                                    {profile.avatar_url ? (
+                                        <SupabaseImage
+                                            src={profile.avatar_url}
+                                            alt={profile.full_name || 'Пользователь'}
+                                            className="w-full h-full object-cover"
+                                            fallback={
+                                                <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-lg font-bold">
+                                                    {(profile.full_name?.[0] || profile.username?.[0] || 'П').toUpperCase()}
+                                                </div>
+                                            }
+                                        />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-lg font-bold">
-                                            {(profile.full_name?.[0] || 'П').toUpperCase()}
+                                            {(profile.full_name?.[0] || profile.username?.[0] || 'П').toUpperCase()}
                                         </div>
                                     )}
                                 </div>
@@ -144,7 +156,6 @@ export default function FollowersPage() {
                                     {profile.username && <p className="text-sm text-gray-500">@{profile.username}</p>}
                                 </div>
                             </Link>
-
                             <FollowButton targetUserId={profile.id} />
                         </div>
                     ))}

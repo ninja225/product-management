@@ -199,10 +199,13 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
                 <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-2xl font-bold rounded-full">
                   {userName?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
-              )}
-            </div>
+              )}            </div>
             <h2 className="font-medium text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">{userName}</h2>
-            <FollowStats userId={userId} className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,1)] mt-1" />
+            <FollowStats
+              userId={userId}
+              username={username || undefined}
+              className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,1)] mt-1"
+            />
             {!isOwner && <FollowButton targetUserId={userId} className="mt-2" />}
           </div>
         </div>
