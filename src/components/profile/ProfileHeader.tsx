@@ -161,7 +161,7 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
   const isBioPage = pathname?.includes('/bio');
 
   return (
-    <div className="pb-4">
+    <div className="">
       {/* Full-width container matched to grid sections */}
       <div className="max-w-7xl mx-auto px-4">
         {/* Cover image section */}
