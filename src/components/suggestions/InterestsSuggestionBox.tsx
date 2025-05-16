@@ -28,7 +28,7 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
   const { inputValue, onFindMatch, excludeUserId } = props
   const [productSuggestions, setProductSuggestions] = useState<SuggestionProductData[]>([])
   const [isVisible, setIsVisible] = useState(false)
-  
+
   const lastSearchRef = useRef<string>('')
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -42,7 +42,7 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
           setIsVisible(false)
         }
       }
-      
+
       document.addEventListener('mousedown', handleClickOutside)
       return () => {
         document.removeEventListener('mousedown', handleClickOutside)
@@ -75,9 +75,9 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
         }
         return
       }
-      
+
       const normalizedInput = inputValue.trim().toLowerCase()
-      
+
       // Skip search if input hasn't changed since last search
       if (normalizedInput === lastSearchRef.current) {
         return
@@ -95,7 +95,7 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
 
       try {
         const supabase = createClient()
-        
+
         // Get most closely matching products (up to 5)
         const { data: matches, error: matchError } = await supabase
           .from('products')
@@ -112,7 +112,7 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
           const exactMatch = matches.find(
             match => match.title?.trim().toLowerCase() === normalizedInput
           )
-          
+
           // Process matches for dropdown
           const suggestions = matches.map(match => ({
             title: match.title || '',
@@ -123,10 +123,10 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
             isFromDatabase: true,
             isExactMatch: match.title?.trim().toLowerCase() === normalizedInput
           }))
-          
+
           setProductSuggestions(suggestions)
           setIsVisible(suggestions.length > 0)
-          
+
           // Only auto-fill if there's an exact match
           if (exactMatch) {
             onFindMatch({
@@ -194,15 +194,14 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
   }
 
   return (
-    <div 
-      ref={dropdownRef} 
+    <div
+      ref={dropdownRef}
       className="absolute z-20 w-full mt-1.5 bg-white rounded-md shadow-md border border-gray-200 overflow-hidden"
     >
-      <ul className={`${
-        productSuggestions.length > 3 ? 'max-h-48 overflow-y-auto' : ''
-      }`}>
+      <ul className={`${productSuggestions.length > 3 ? 'max-h-48 overflow-y-auto' : ''
+        }`}>
         {productSuggestions.map((suggestion, index) => (
-          <li 
+          <li
             key={index}
             onClick={() => handleSuggestionSelect(suggestion)}
             className="cursor-pointer hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0"
@@ -214,7 +213,7 @@ const ProductSuggestionBox = (props: ProductSuggestionBoxProps) => {
                   {suggestion.title}
                 </span>
               </div>
-              
+
               {/* Badge indicating it's from database */}
               <div className="flex-shrink-0">
                 <span className="text-xs bg-indigo-100 text-[#3d82f7] px-2 py-0.5 rounded-full whitespace-nowrap font-medium">

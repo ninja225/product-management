@@ -198,14 +198,23 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
     setLeftProducts(prev => prev.filter(p => p.id !== productId))
     setRightProducts(prev => prev.filter(p => p.id !== productId))
   }
-
   const handleEditProduct = (product: Product) => {
+    // Just set the editing product, form will render inline
     setEditingProduct(product)
+    // Mark form visibility for the appropriate section (used for "Add" button logic)
     if (product.display_section === 'left') {
       setShowLeftForm(true)
     } else {
       setShowRightForm(true)
     }
+
+    // Scroll the edited product into view after a short delay
+    setTimeout(() => {
+      const productElement = document.getElementById(`intrests-${product.id}`)
+      if (productElement) {
+        productElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 100)
   }
 
   // Handler for image updates directly from ProductCard
@@ -304,28 +313,25 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
               </div>
 
               {/* Show add button only for profile owner */}
-              {isOwner && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingProduct(undefined)
-                    setShowLeftForm(true)
-                  }}
-                  className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#2daa4f] rounded-md hover:bg-[#249c47] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
-                >
-                  <PlusCircle size={16} />
-                  <span className="sm:hidden">Добавить</span>
-                  <span className="hidden sm:inline">Добавить</span>
-                </button>
-              )}
-            </div>
+              {isOwner && (<button
+                type="button"
+                onClick={() => {
+                  setEditingProduct(undefined) // Clear any editing state
+                  setShowLeftForm(true) // Show the Add form at the top
+                }}
+                className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#2daa4f] rounded-md hover:bg-[#249c47] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+              >
+                <PlusCircle size={16} />
+                <span className="sm:hidden">Добавить</span>
+                <span className="hidden sm:inline">Добавить</span>
+              </button>
+              )}            </div>
 
-            {/* Product form for owner */}
-            {isOwner && showLeftForm && currentUserId && (
+            {/* Show Add Form for owner when adding a new product (not editing) */}
+            {isOwner && showLeftForm && !editingProduct && currentUserId && (
               <div className="mb-6 animate-slideDown">
                 <ProductForm
                   userId={currentUserId}
-                  product={editingProduct?.display_section === 'left' ? editingProduct : undefined}
                   section="left"
                   onComplete={handleFormComplete}
                   onCancel={() => {
@@ -334,27 +340,37 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                   }}
                 />
               </div>
-            )}
-
-            <div className="space-y-4">
+            )}<div className="space-y-4">
               {filteredLeftProducts.length > 0 ? (
-                filteredLeftProducts.map(product => (
-                  isOwner ? (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onDelete={handleDeleteProduct}
-                      onEdit={handleEditProduct}
-                      onTagClick={handleTagClick}
-                      onImageUpdate={handleImageUpdate}
+                filteredLeftProducts.map(product => (isOwner && editingProduct?.id === product.id && editingProduct.display_section === 'left' ? (
+                  <div key={product.id} className="animate-fadeIn bg-white p-4 rounded-lg shadow-md border-2 border-green-400">
+                    <ProductForm
+                      userId={currentUserId!}
+                      product={editingProduct}
+                      section="left"
+                      onComplete={handleFormComplete}
+                      onCancel={() => {
+                        setShowLeftForm(false)
+                        setEditingProduct(undefined)
+                      }}
                     />
-                  ) : (
-                    <ReadOnlyProductCard
-                      key={product.id}
-                      product={product}
-                      onTagClick={handleTagClick}
-                    />
-                  )
+                  </div>
+                ) : isOwner ? (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onDelete={handleDeleteProduct}
+                    onEdit={handleEditProduct}
+                    onTagClick={handleTagClick}
+                    onImageUpdate={handleImageUpdate}
+                  />
+                ) : (
+                  <ReadOnlyProductCard
+                    key={product.id}
+                    product={product}
+                    onTagClick={handleTagClick}
+                  />
+                )
                 ))
               ) : (
                 <div className="py-10 text-center text-gray-500 animate-pulse">
@@ -387,28 +403,25 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
               </div>
 
               {/* Show add button only for profile owner */}
-              {isOwner && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingProduct(undefined)
-                    setShowRightForm(true)
-                  }}
-                  className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#f05d4d] rounded-md hover:bg-[#e04d3e] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
-                >
-                  <PlusCircle size={16} />
-                  <span className="sm:hidden">Добавить</span>
-                  <span className="hidden sm:inline">Добавить</span>
-                </button>
-              )}
-            </div>
+              {isOwner && (<button
+                type="button"
+                onClick={() => {
+                  setEditingProduct(undefined) // Clear any editing state
+                  setShowRightForm(true) // Show the Add form at the top
+                }}
+                className="cursor-pointer px-2 py-1 text-xs sm:text-sm text-white bg-[#f05d4d] rounded-md hover:bg-[#e04d3e] transition-colors duration-200 whitespace-nowrap transform hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+              >
+                <PlusCircle size={16} />
+                <span className="sm:hidden">Добавить</span>
+                <span className="hidden sm:inline">Добавить</span>
+              </button>
+              )}            </div>
 
-            {/* Product form for owner */}
-            {isOwner && showRightForm && currentUserId && (
+            {/* Show Add Form for owner when adding a new product (not editing) */}
+            {isOwner && showRightForm && !editingProduct && currentUserId && (
               <div className="mb-6 animate-slideDown">
                 <ProductForm
                   userId={currentUserId}
-                  product={editingProduct?.display_section === 'right' ? editingProduct : undefined}
                   section="right"
                   onComplete={handleFormComplete}
                   onCancel={() => {
@@ -417,27 +430,37 @@ export default function PublicProfileContent({ userId }: PublicProfileContentPro
                   }}
                 />
               </div>
-            )}
-
-            <div className="space-y-4">
+            )}<div className="space-y-4">
               {filteredRightProducts.length > 0 ? (
-                filteredRightProducts.map(product => (
-                  isOwner ? (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onDelete={handleDeleteProduct}
-                      onEdit={handleEditProduct}
-                      onTagClick={handleTagClick}
-                      onImageUpdate={handleImageUpdate}
+                filteredRightProducts.map(product => (isOwner && editingProduct?.id === product.id && editingProduct.display_section === 'right' ? (
+                  <div key={product.id} className="animate-fadeIn bg-white p-4 rounded-lg shadow-md border-2 border-red-400">
+                    <ProductForm
+                      userId={currentUserId!}
+                      product={editingProduct}
+                      section="right"
+                      onComplete={handleFormComplete}
+                      onCancel={() => {
+                        setShowRightForm(false)
+                        setEditingProduct(undefined)
+                      }}
                     />
-                  ) : (
-                    <ReadOnlyProductCard
-                      key={product.id}
-                      product={product}
-                      onTagClick={handleTagClick}
-                    />
-                  )
+                  </div>
+                ) : isOwner ? (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onDelete={handleDeleteProduct}
+                    onEdit={handleEditProduct}
+                    onTagClick={handleTagClick}
+                    onImageUpdate={handleImageUpdate}
+                  />
+                ) : (
+                  <ReadOnlyProductCard
+                    key={product.id}
+                    product={product}
+                    onTagClick={handleTagClick}
+                  />
+                )
                 ))
               ) : (
                 <div className="py-10 text-center text-gray-500 animate-pulse">
