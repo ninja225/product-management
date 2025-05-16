@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
@@ -172,7 +171,8 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
               alt="Profile Cover"
               className="w-full h-full object-cover rounded-t-lg"
               priority={true}
-              quality={85}
+              quality={50}
+              sizes="100vw"
               fallback={
                 <div className="rounded-lg w-full h-full bg-gradient-to-r from-[#3d82f7] to-purple-600"></div>
               }
@@ -188,7 +188,8 @@ export default function ProfileHeader({ userId, tagFilter = '', onTagFilterChang
                   alt="User Avatar"
                   className="w-full h-full rounded-full object-cover"
                   priority={true}
-                  quality={90}
+                  quality={80}
+                  sizes="130px"
                   fallback={
                     <div className="w-full h-full flex items-center justify-center bg-indigo-200 text-indigo-600 text-2xl font-bold rounded-full animate-pulse">
                       {userName?.charAt(0)?.toUpperCase() || 'U'}
