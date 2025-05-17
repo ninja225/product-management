@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import LoadingProvider from "@/components/ui/LoadingProvider";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className={inter.className}>
+        <LoadingProvider color="#3d82f7" height={3} />
         {children}
         <Toaster position="top-right" />
       </body>
