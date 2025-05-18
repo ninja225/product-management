@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link'
-import { LogIn, UserPlus, Menu, X, Home, Settings, LogOut, User } from 'lucide-react'
+import { LogIn, UserPlus, Menu, X, Home, Settings, LogOut, User as UserIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase'
 import NotificationIndicator from '@/components/notifications/NotificationIndicator'
@@ -71,20 +71,19 @@ export default function PublicProfileLayout({ children }: { children: React.Reac
                 )}
               </button>
             </div>
-
             <div className="hidden sm:flex items-center space-x-6 flex-1">
               <Link
-                href="#"//will make the route at 
+                href="/feed"
                 className="px-2 py-1 text-sm font-medium rounded-md flex items-center space-x-1 text-gray-700 hover:text-gray-900 transition-colors duration-300"
               >
                 <Home className="w-4 h-4" />
-                <span>Главная</span>
+                <span>Лента</span>
               </Link>
               <Link
-                href="/" //will make the route at  
+                href="/"
                 className="px-2 py-1 text-sm font-medium rounded-md flex items-center space-x-1 text-gray-700 hover:text-gray-900 transition-colors duration-300"
               >
-                <User className="w-4 h-4" />
+                <UserIcon className="w-4 h-4" />
                 <span>профиль</span>
               </Link>
               <Link
@@ -152,16 +151,23 @@ export default function PublicProfileLayout({ children }: { children: React.Reac
           id="mobile-menu"
           className={`sm:hidden transition-all duration-300 ease-in-out transform ${mobileMenuOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
             }`}
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1 shadow-lg bg-white">
+        >          <div className="px-2 pt-2 pb-3 space-y-1 shadow-lg bg-white">
             <Link
-              href="/"
+              href="/feed"
               onClick={() => setMobileMenuOpen(false)}
               className="block w-full text-left px-3 py-3 text-base font-medium rounded-md flex items-center space-x-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-300"
             >
               <Home className="w-5 h-5" />
-              <span>Главная</span>
-            </Link>              <Link
+              <span>Лента</span>
+            </Link>            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full text-left px-3 py-3 text-base font-medium rounded-md flex items-center space-x-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-300"
+            >
+              <UserIcon className="w-5 h-5" />
+              <span>профиль</span>
+            </Link>
+            <Link
               href="/notifications"
               onClick={() => setMobileMenuOpen(false)}
               className="block w-full text-left px-3 py-3 text-base font-medium rounded-md flex items-center space-x-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-300"
