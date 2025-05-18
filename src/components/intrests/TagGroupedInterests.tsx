@@ -56,32 +56,43 @@ export default function TagGroupedInterests({
                 Нет интересов для отображения.
             </div>
         );
-    } return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
-            {/* Left Display Section - like interests */}
-            <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
-                {/* Rounded top border for "like" section */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
+    }
 
-                <div className="flex items-center gap-2 mb-6">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
-                        Нравится
-                    </h2>
-                    <Image
-                        src="/assets/like.png"
-                        width={32}
-                        height={32}
-                        alt="Like"
-                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
-                    />
-                </div><div className="space-y-10">
-                    {tagsToDisplay.map(tag => (
-                        <div key={`left-${tag}`} className="space-y-3">
-                            <div className="lg:hidden mb-3 text-[#3d82f7] font-semibold">
-                                {tag.replace(/^#/, '')}
-                            </div>                            {groupedProducts[tag].left.length > 0 ? (
-                                <>
-                                    {groupedProducts[tag].left.map(product => (
+    return (
+        <div className="space-y-10">
+            {tagsToDisplay.map(tag => (
+                <div key={tag} className="relative">                    {/* Tag badge in the center */}
+                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-10">
+                        <div
+                            className="bg-[#3d82f7] text-white rounded-lg py-1.5 px-3.5 inline-block shadow-md text-sm"
+                        >
+                            <span className="font-medium">{tag}</span>
+                        </div>
+                    </div>
+
+                    {/* Two-column grid for the likes and dislikes */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t border-gray-200 relative">
+                        {/* Left Display Section - like interests */}
+                        <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
+                            {/* Rounded top border for "like" section */}
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
+
+                            <div className="flex items-center gap-2 mb-4">
+                                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                                    Нравится
+                                </h2>
+                                <Image
+                                    src="/assets/like.png"
+                                    width={32}
+                                    height={32}
+                                    alt="Like"
+                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                {groupedProducts[tag].left.length > 0 ? (
+                                    groupedProducts[tag].left.map(product => (
                                         isOwner ? (
                                             <ProductCard
                                                 key={product.id}
@@ -98,69 +109,35 @@ export default function TagGroupedInterests({
                                                 onTagClick={onTagClick}
                                             />
                                         )
-                                    ))}
-                                </>
-                            ) : (
-                                <div className="py-10 mb-4 text-center text-gray-400 text-sm italic border border-dashed border-gray-200 rounded-lg">
-                                    Нет интересов в разделе &quot;Нравится&quot; с тегом {tag.replace(/^#/, '')}
+                                    ))
+                                ) : (<div className="py-4 text-center text-gray-400 text-sm italic">
+                                    Нет интересов в разделе &quot;Нравится&quot; с тегом {tag}
                                 </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </section>            {/* Center divider with tag badges */}            <div className="hidden lg:flex absolute left-1/2 top-0 bottom-0 z-10 flex-col items-center transform -translate-x-1/2">
-                <div className={`h-full flex flex-col justify-start pt-16 ${tagsToDisplay.length <= 1 ? '' : 'space-y-32'
-                    }`}>
-                    {tagsToDisplay.map(tag => (
-                        <div
-                            key={tag}
-                            className="bg-[#3d82f7] text-white rounded-lg py-1.5 px-3.5 shadow-md text-sm whitespace-nowrap flex items-center justify-center"
-                        >
-                            <span className="font-medium">{tag.replace(/^#/, '')}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>            {/* Mobile tag badges (only visible on small screens) */}
-            {!tagFilter && (
-                <div className="lg:hidden col-span-1 flex flex-wrap justify-center gap-2 mb-4">
-                    {tagsToDisplay.map(tag => (
-                        <div
-                            key={tag}
-                            className="bg-[#3d82f7] text-white rounded-lg py-1.5 px-3.5 shadow-md text-sm whitespace-nowrap flex items-center justify-center"
-                        >
-                            <span className="font-medium">{tag.replace(/^#/, '')}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
+                                )}
+                            </div>
+                        </section>
 
-            {/* Vertical separator line */}
-            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 opacity-70 transform -translate-x-1/2"></div>
+                        {/* Right Display Section - dislike interests */}
+                        <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
+                            {/* Rounded top border for "dislike" section */}
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
 
-            {/* Right Display Section - dislike interests */}
-            <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
-                {/* Rounded top border for "dislike" section */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                                    Не Нравится
+                                </h2>
+                                <Image
+                                    src="/assets/dislike.png"
+                                    width={32}
+                                    height={32}
+                                    alt="Dislike"
+                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
+                                />
+                            </div>
 
-                <div className="flex items-center gap-2 mb-6">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
-                        Не Нравится
-                    </h2>
-                    <Image
-                        src="/assets/dislike.png"
-                        width={32}
-                        height={32}
-                        alt="Dislike"
-                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
-                    />
-                </div>                <div className="space-y-10">
-                    {tagsToDisplay.map(tag => (
-                        <div key={`right-${tag}`} className="space-y-3">
-                            <div className="lg:hidden mb-3 text-[#3d82f7] font-semibold">
-                                {tag.replace(/^#/, '')}
-                            </div>                            {groupedProducts[tag].right.length > 0 ? (
-                                <>
-                                    {groupedProducts[tag].right.map(product => (
+                            <div className="space-y-4">
+                                {groupedProducts[tag].right.length > 0 ? (
+                                    groupedProducts[tag].right.map(product => (
                                         isOwner ? (
                                             <ProductCard
                                                 key={product.id}
@@ -177,17 +154,16 @@ export default function TagGroupedInterests({
                                                 onTagClick={onTagClick}
                                             />
                                         )
-                                    ))}
-                                </>
-                            ) : (
-                                <div className="py-10 mb-4 text-center text-gray-400 text-sm italic border border-dashed border-gray-200 rounded-lg">
-                                    Нет интересов в разделе &quot;Не Нравится&quot; с тегом {tag.replace(/^#/, '')}
+                                    ))
+                                ) : (<div className="py-4 text-center text-gray-400 text-sm italic">
+                                    Нет интересов в разделе &quot;Не Нравится&quot; с тегом {tag}
                                 </div>
-                            )}
-                        </div>
-                    ))}
+                                )}
+                            </div>
+                        </section>
+                    </div>
                 </div>
-            </section>
+            ))}
         </div>
-    );
+    )
 }
