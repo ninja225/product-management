@@ -60,7 +60,7 @@ export default function TagGroupedInterests({
 
     return (
         <div className="space-y-10">
-            {tagsToDisplay.map(tag => (
+            {tagsToDisplay.map((tag, index) => (
                 <div key={tag} className="relative">                    {/* Tag badge in the center */}
                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-10">
                         <div
@@ -74,21 +74,26 @@ export default function TagGroupedInterests({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t border-gray-200 relative">
                         {/* Left Display Section - like interests */}
                         <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
-                            {/* Rounded top border for "like" section */}
-                            <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
+                            {/* Rounded top border for "like" section - only show in the first group */}
+                            {index === 0 && (
+                                <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-lg"></div>
+                            )}
 
-                            <div className="flex items-center gap-2 mb-4">
-                                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
-                                    Нравится
-                                </h2>
-                                <Image
-                                    src="/assets/like.png"
-                                    width={32}
-                                    height={32}
-                                    alt="Like"
-                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
-                                />
-                            </div>
+                            {/* Only show header in the first group */}
+                            {index === 0 && (
+                                <div className="flex items-center gap-2 mb-4">
+                                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                                        Нравится
+                                    </h2>
+                                    <Image
+                                        src="/assets/like.png"
+                                        width={32}
+                                        height={32}
+                                        alt="Like"
+                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
+                                    />
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {groupedProducts[tag].left.length > 0 ? (
@@ -119,21 +124,26 @@ export default function TagGroupedInterests({
 
                         {/* Right Display Section - dislike interests */}
                         <section className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden relative">
-                            {/* Rounded top border for "dislike" section */}
-                            <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
+                            {/* Rounded top border for "dislike" section - only show in the first group */}
+                            {index === 0 && (
+                                <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-lg"></div>
+                            )}
 
-                            <div className="flex items-center gap-2 mb-4">
-                                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
-                                    Не Нравится
-                                </h2>
-                                <Image
-                                    src="/assets/dislike.png"
-                                    width={32}
-                                    height={32}
-                                    alt="Dislike"
-                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
-                                />
-                            </div>
+                            {/* Only show header in the first group */}
+                            {index === 0 && (
+                                <div className="flex items-center gap-2 mb-4">
+                                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+                                        Не Нравится
+                                    </h2>
+                                    <Image
+                                        src="/assets/dislike.png"
+                                        width={32}
+                                        height={32}
+                                        alt="Dislike"
+                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
+                                    />
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {groupedProducts[tag].right.length > 0 ? (
