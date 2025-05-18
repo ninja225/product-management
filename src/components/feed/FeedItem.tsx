@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Database } from '@/types/database'
 import SupabaseImage from '@/components/ui/SupabaseImage'
 import { User, ThumbsUp, ThumbsDown } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 type FeedProduct = Database['public']['Tables']['products']['Row'] & {
@@ -31,8 +31,7 @@ export default function FeedItem({ product }: FeedItemProps) {
         profiles
     } = product
 
-    const formattedDate = formatDistanceToNow(new Date(created_at), {
-        addSuffix: true,
+    const formattedDate = format(new Date(created_at), 'dd.MM.yyyy', {
         locale: ru
     })
 
@@ -64,12 +63,10 @@ export default function FeedItem({ product }: FeedItemProps) {
                             ) : (
                                 <User className="h-6 w-6 text-gray-400" />
                             )}
-                        </div>
-                        <div>
+                        </div>                        <div>
                             <div className="font-medium text-gray-800 group-hover:text-[#3d82f7] transition-colors">
                                 {displayName}
                             </div>
-                            <div className="text-xs text-gray-500">{formattedDate}</div>
                         </div>
                     </Link>
 
@@ -104,21 +101,24 @@ export default function FeedItem({ product }: FeedItemProps) {
                                 className="w-full h-auto object-cover max-h-80"
                             />
                         </div>
-                    )}                    {/* Description */}
+                    )}
+                    {/* Description */}
                     {description && (
                         <div className="text-gray-700 mb-3 whitespace-pre-line break-words">
                             {description}
                         </div>
-                    )}
-
-                    {/* Tags */}
-                    {tag && (
-                        <div className="mt-2">
+                    )}                    {/* Tags and date in one row */}
+                    <div className="mt-2 flex items-center justify-between">
+                        {tag && (
                             <span className="inline-flex items-center bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs">
-                                #{tag}
+                                {tag}
                             </span>
+                        )}
+                        {/* Date display on the right side */}
+                        <div className="text-xs bg-gray-50 text-gray-500 px-2 py-1 rounded-md border border-gray-100 shadow-sm ml-auto">
+                            {formattedDate}
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>
