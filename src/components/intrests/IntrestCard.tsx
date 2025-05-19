@@ -7,6 +7,8 @@ import SupabaseImage from '../ui/SupabaseImage'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
 import { Edit, Trash2, Tag, Upload, Loader2, MoreVertical } from 'lucide-react'
 import optimizeImage from '@/utils/imageOptimizer'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 
 type Product = Database['public']['Tables']['products']['Row']
 
@@ -413,9 +415,7 @@ export default function ProductCard({
                   {showFullDescription ? 'Показать меньше' : 'Показать больше'}
                 </button>
               )}
-            </div>
-
-            {/* Tag and date */}
+            </div>            {/* Tag and date */}
             <div className="flex justify-between items-center py-1 sm:py-2 border-t border-gray-100 group-hover:border-indigo-50 transition-colors duration-300">
               <button
                 type="button"
@@ -426,11 +426,7 @@ export default function ProductCard({
                 <span className="md:inline">{`#${getDisplayTag()}`}</span>
               </button>
               <div className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-                {new Date(product.created_at).toLocaleDateString('ru-RU', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                }).replace(/\//g, '.')}
+                {format(new Date(product.created_at), 'dd.MM.yyyy', { locale: ru })}
               </div>
             </div>
           </div>

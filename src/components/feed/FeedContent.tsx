@@ -39,10 +39,12 @@ export default function FeedContent() {
         setPage(1)
 
         try {
-            // First fetch products
+            // First fetch products with descriptions
             const { data: products, error: productsError } = await supabase
                 .from('products')
                 .select('*')
+                .not('description', 'is', null)
+                .not('description', 'eq', '')
                 .order('created_at', { ascending: false })
                 .limit(itemsPerPage)
 
@@ -96,10 +98,12 @@ export default function FeedContent() {
 
         setIsLoading(true)
         try {
-            // First fetch the next page of products
+            // First fetch the next page of products with descriptions
             const { data: moreProducts, error: productsError } = await supabase
                 .from('products')
                 .select('*')
+                .not('description', 'is', null)
+                .not('description', 'eq', '')
                 .order('created_at', { ascending: false })
                 .range(page * itemsPerPage, (page + 1) * itemsPerPage - 1)
 

@@ -12,6 +12,7 @@ import { DEFAULT_TAG } from './IntrestCard'
 import { toast } from 'react-hot-toast'
 import ConfirmationDialog from '../ui/ConfirmationDialog'
 import optimizeImage from '@/utils/imageOptimizer'
+import { format } from 'date-fns'
 
 type Product = Database['public']['Tables']['products']['Row']
 type ProductInsert = Database['public']['Tables']['products']['Insert']
@@ -492,9 +493,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         }
       } else if (imagePreview && imagePreview !== product?.image_url) {
         imageUrl = imagePreview
-      }
-
-      // Handle the tag properly to ensure exactly one # symbol
+      }      // Handle the tag properly to ensure exactly one # symbol
       let finalTag = '';
       if (tagWithoutHash && tagWithoutHash.trim()) {
         // Remove any # at the beginning if present
@@ -503,16 +502,22 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         finalTag = cleanTag ? `#${cleanTag}` : '';
       } else {
         finalTag = DEFAULT_TAG;
-      }
-
+      }      
+      
       // Update productData to use the potentially corrected title (finalTitle)
+      // Using date-fns to ensure consistent date formatting across the app
+      // This ensures the created_at field is properly formatted for Supabase
+      const now = new Date();
+      const isoDateString = format(now, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+      
       const productData: ProductInsert = {
         user_id: userId,
         title: finalTitle, // Use the finalized title with proper capitalization
         description: description.trim(),
         tag: finalTag,
         image_url: imageUrl,
-        display_section: section
+        display_section: section,
+        created_at: isoDateString // Explicitly set to current date/time using date-fns
       }
 
       if (isEditing && product?.id) {
