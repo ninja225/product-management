@@ -28,7 +28,7 @@ interface ProductFormProps {
 export default function ProductForm({ userId, product, section, onComplete, onCancel }: ProductFormProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [tag, setTag] = useState('')
+  const [, setTag] = useState('')
   const [tagWithoutHash, setTagWithoutHash] = useState('') // Store tag without hash for display
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -151,25 +151,16 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       resetAutofilledData()
     }
   }
-
   const resetAutofilledData = () => {
     // Don't clear fields when editing an existing product
     if (isEditing) return
 
     // Only reset fields that were autofilled from database
     if (productFromDb) {
-      // Clear description only if it matches the database value
-      if (description === productFromDb.description) {
-        setDescription('')
-      }
       // Reset image if it was from the database
       if (imagePreview === productFromDb.image_url) {
         setImagePreview(null)
         setImage(null)
-      }      // Reset tag if it was from the database
-      if (tag === productFromDb.tag) {
-        setTag('')
-        setTagWithoutHash('')
       }
 
       // Unlock fields - but keep tag always unlocked
@@ -254,9 +245,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           resetAutofilledData()
         }
         return
-      }
-
-      // If we have a suggestion and we're not in editing mode, autofill
+      }      // If we have a suggestion and we're not in editing mode, autofill only image
       if (suggestionData && !isEditing) {
         // Store the database product for reference
         setProductFromDb(suggestionData)
@@ -266,20 +255,12 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
           setTitle(suggestionData.title)
         }
 
-        // Auto-fill the fields
-        if (suggestionData.description) {
-          setDescription(suggestionData.description)
-        }
-
-        if (suggestionData.tag) {
-          setTag(suggestionData.tag)
-          // Handle tag with or without hash for display
-          setTagWithoutHash(suggestionData.tag.startsWith('#') ? suggestionData.tag.substring(1) : suggestionData.tag)
-        }
-
+        // Only auto-fill image, not description or tag
         if (suggestionData.image_url) {
           setImagePreview(suggestionData.image_url)
-        }        // If this suggestion is from the database, lock only image field
+        }
+
+        // If this suggestion is from the database, lock only image field
         if (suggestionData.isFromDatabase) {
           setLockedFields({
             tag: false, // Always allow tag editing
