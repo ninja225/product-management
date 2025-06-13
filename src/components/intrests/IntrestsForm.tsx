@@ -78,21 +78,18 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       }
     }
   }, [product])
-
-  // Handle tag changes - strip # and commas if user adds them
+  // Handle tag changes - always allow tag changes regardless of locking
   const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!lockedFields.tag) {
-      const value = e.target.value
+    const value = e.target.value
 
-      // Remove # symbol and commas if user types them
-      const cleanTag = value.startsWith('#') ? value.substring(1) : value
-      const tagWithoutCommas = cleanTag.replace(/,/g, '')
+    // Remove # symbol and commas if user types them
+    const cleanTag = value.startsWith('#') ? value.substring(1) : value
+    const tagWithoutCommas = cleanTag.replace(/,/g, '')
 
-      setTagWithoutHash(tagWithoutCommas)
+    setTagWithoutHash(tagWithoutCommas)
 
-      // Store the tag value - we'll add the # only during submission      // Don't add # here to prevent duplicates
-      setTag(tagWithoutCommas)
-    }
+    // Store the tag value - we'll add the # only during submission      // Don't add # here to prevent duplicates
+    setTag(tagWithoutCommas)
   },
 
     handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,16 +166,15 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
       if (imagePreview === productFromDb.image_url) {
         setImagePreview(null)
         setImage(null)
-      }
-      // Reset tag if it was from the database
+      }      // Reset tag if it was from the database
       if (tag === productFromDb.tag) {
         setTag('')
         setTagWithoutHash('')
       }
 
-      // Unlock fields
+      // Unlock fields - but keep tag always unlocked
       setLockedFields({
-        tag: false,
+        tag: false, // Always allow tag editing
         image: false
       })
 
@@ -283,12 +279,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
 
         if (suggestionData.image_url) {
           setImagePreview(suggestionData.image_url)
-        }
-
-        // If this suggestion is from the database, lock fields
+        }        // If this suggestion is from the database, lock only image field
         if (suggestionData.isFromDatabase) {
           setLockedFields({
-            tag: !!suggestionData.tag,
+            tag: false, // Always allow tag editing
             image: !!suggestionData.image_url
           })
         }
@@ -502,14 +496,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
         finalTag = cleanTag ? `#${cleanTag}` : '';
       } else {
         finalTag = DEFAULT_TAG;
-      }      
-      
+      }
+
       // Update productData to use the potentially corrected title (finalTitle)
       // Using date-fns to ensure consistent date formatting across the app
       // This ensures the created_at field is properly formatted for Supabase
       const now = new Date();
       const isoDateString = format(now, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
-      
+
       const productData: ProductInsert = {
         user_id: userId,
         title: finalTitle, // Use the finalized title with proper capitalization
@@ -549,13 +543,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
   const handleTagSuggestionsFound = (suggestions: SuggestionTagData[] | null, isSearching: boolean) => {
     setIsSearchingTagSuggestions(isSearching)
   }
-
-  // Handle tag selection from suggestions
+  // Handle tag selection from suggestions - always allow tag selection
   const handleTagSelect = (selectedTag: string) => {
-    if (!lockedFields.tag) {
-      setTagWithoutHash(selectedTag)
-      setTag(selectedTag)
-    }
+    setTagWithoutHash(selectedTag)
+    setTag(selectedTag)
   }
 
   return (
@@ -639,15 +630,10 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             className="w-full text-black px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7]"
             placeholder="Опишите ваш интерес"
           />
-        </div>
-
-        {/* Tag section */}
+        </div>        {/* Tag section - always allow editing */}
         <div className="mb-6">
           <label htmlFor="tag" className="block text-sm font-medium text-black mb-1 flex items-center gap-2">
             <span>теги</span>
-            {lockedFields.tag && (
-              <Lock size={14} className="text-[#3d82f7]" aria-label="Это поле заблокировано, так как Интерес из базы данных" />
-            )}
             {isSearchingTagSuggestions && (
               <span className="text-xs text-[#3d82f7]  flex items-center gap-1">
                 <RefreshCw size={12} className="animate-spin" />
@@ -664,10 +650,7 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               type="text"
               value={tagWithoutHash}
               onChange={handleTagChange}
-              disabled={lockedFields.tag}
-              className={`w-full text-black pl-8 pr-3 py-2 border ${lockedFields.tag ? 'bg-gray-50 border-indigo-200 cursor-not-allowed' : 'border-gray-300'
-                } rounded-md shadow-sm focus:outline-none ${!lockedFields.tag ? 'focus:ring-[#3d82f7] focus:border-[#3d82f7]' : ''
-                } ${isSearchingTagSuggestions ? 'bg-gray-50' : ''}`}
+              className={`w-full text-black pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#3d82f7] focus:border-[#3d82f7] ${isSearchingTagSuggestions ? 'bg-gray-50' : ''}`}
               placeholder="Добавить тег (без символа #)"
             />
             {isSearchingTagSuggestions && (
@@ -676,24 +659,14 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
               </div>
             )}
           </div>
-          {!lockedFields.tag && (
-            <>
-              <p className="mt-1 text-xs text-[#3d82f7]  flex items-center gap-1">
-                <Info size={12} />
-                <span>Символ # добавляется автоматически</span>
-              </p>
-              <TagSuggestionBox
-                inputValue={tagWithoutHash}
-                onSelectTag={handleTagSelect}
-                onFindMatches={handleTagSuggestionsFound}
-              />
-            </>
-          )}
-          {lockedFields.tag && (
-            <p className="mt-1 text-xs text-gray-500">
-              автоматически заполнена
-            </p>
-          )}
+          <p className="mt-1 text-xs text-[#3d82f7]  flex items-center gap-1">
+            <Info size={12} />
+            <span>Символ # добавляется автоматически</span>
+          </p>
+          <TagSuggestionBox
+            inputValue={tagWithoutHash}
+            onSelectTag={handleTagSelect}
+            onFindMatches={handleTagSuggestionsFound} />
         </div>
 
         {/* Image section */}
