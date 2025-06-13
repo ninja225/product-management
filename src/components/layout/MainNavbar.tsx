@@ -94,7 +94,7 @@ export default function PublicProfileLayout({ children }: { children: React.Reac
                 className="px-2 py-1 text-sm font-medium rounded-md flex items-center space-x-1 text-gray-700 hover:text-gray-900 transition-colors duration-300"
               >
                 <UserIcon className="w-4 h-4" />
-                <span>профиль</span>
+                <span>Профиль</span>
               </Link>
               <Link
                 href="/notifications"

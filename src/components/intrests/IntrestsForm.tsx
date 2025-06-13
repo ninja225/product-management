@@ -659,13 +659,13 @@ export default function ProductForm({ userId, product, section, onComplete, onCa
             )}
           </label>
           {imagePreview && (
-            <div className={`relative h-48 mb-2 border rounded-md overflow-hidden ${lockedFields.image ? 'border-indigo-200' : 'border-gray-300'
+            <div className={`relative h-48 aspect-square mb-2 border rounded-md overflow-hidden ${lockedFields.image ? 'border-indigo-200' : 'border-gray-300'
               }`}>
               <SupabaseImage
                 src={imagePreview}
                 alt="Product preview"
                 fill
-                className="object-contain"
+                className="object-cover"
                 fallback={
                   <div className="w-full h-full flex items-center justify-center bg-gray-200">
                     <p className="text-gray-500">Предварительный просмотр недоступен</p>
